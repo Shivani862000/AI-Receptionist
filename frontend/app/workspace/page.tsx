@@ -8,12 +8,18 @@ import {
   Bot,
   BriefcaseBusiness,
   CalendarDays,
+  CheckCircle2,
   ChevronRight,
+  Circle,
   ClipboardList,
   CreditCard,
   FileText,
+  Headphones,
+  HelpCircle,
+  LifeBuoy,
   Mail,
   MessageCircleMore,
+  MessageSquareText,
   MessagesSquare,
   Mic,
   Package2,
@@ -23,11 +29,14 @@ import {
   Play,
   Plus,
   Receipt,
+  Rocket,
   ScanText,
+  Send,
   Settings2,
   ShieldCheck,
   Sparkles,
   Stethoscope,
+  Upload,
   UserPlus,
   Users2,
   Volume2,
@@ -47,6 +56,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { AnimatePresence, motion } from "framer-motion";
 
 import {
   Dialog,
@@ -59,9 +69,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 
 const ONBOARDING_STORAGE_KEY = "ai-receptionist-demo-auth";
+const PRODUCT_ONBOARDING_KEY = "ai-receptionist-product-onboarding";
 
 type NavKey = "dashboard" | "ai-agent" | "clients" | "services" | "reports" | "business";
 
@@ -228,6 +241,51 @@ const recentActivity = [
   { title: "Client note added", detail: "Priya requested package pricing after the last call.", time: "54 min ago" },
 ];
 
+const wizardSteps = [
+  { title: "Create Business", description: "Confirm your workspace name, location, and support owner.", icon: BriefcaseBusiness, field: "Business name", value: "Aira Health Concierge" },
+  { title: "Upload Logo", description: "Add a brand mark for emails, reports, and the client portal.", icon: Upload, field: "Logo", value: "aira-logo.png" },
+  { title: "Configure AI Voice", description: "Choose greeting tone, voice style, language, and fallback rules.", icon: Mic, field: "Voice style", value: "Warm professional Hindi + English" },
+  { title: "Connect Twilio", description: "Attach your voice number for incoming and outgoing calls.", icon: PhoneCall, field: "Twilio number", value: "+1 555 0182 229" },
+  { title: "Connect WhatsApp", description: "Enable reminder templates, status updates, and reply capture.", icon: MessageCircleMore, field: "WhatsApp sender", value: "Twilio Sandbox" },
+  { title: "Add First Client", description: "Create one sample client so the CRM and call flows have context.", icon: UserPlus, field: "Client", value: "Anika Sharma" },
+  { title: "Create First Automation", description: "Launch your first smart reminder or follow-up workflow.", icon: Workflow, field: "Automation", value: "Missed call rescue" },
+  { title: "Test AI Call", description: "Run a simulated inbound call and review transcript + summary.", icon: Headphones, field: "Test scenario", value: "Report status enquiry" },
+];
+
+const checklistItems = [
+  { title: "Complete business profile", complete: true, cta: "Review profile", nav: "business" as NavKey },
+  { title: "Add first client", complete: true, cta: "Open clients", nav: "clients" as NavKey },
+  { title: "Connect WhatsApp", complete: true, cta: "View messages", nav: "ai-agent" as NavKey },
+  { title: "Configure AI voice", complete: false, cta: "Configure voice", nav: "ai-agent" as NavKey },
+  { title: "Create automation", complete: false, cta: "Open flows", nav: "dashboard" as NavKey },
+  { title: "Test AI call", complete: false, cta: "Run demo", nav: "ai-agent" as NavKey },
+  { title: "Export first report", complete: false, cta: "Open reports", nav: "reports" as NavKey },
+];
+
+const tourSteps = [
+  { nav: "dashboard" as NavKey, title: "Realtime AI dashboard", description: "This is your command center for calls, messages, reminders, and AI insights.", position: "left-4 top-28 h-56 w-[calc(100%-2rem)] lg:left-[320px] lg:top-40 lg:h-72 lg:w-[520px]" },
+  { nav: "clients" as NavKey, title: "Client CRM memory", description: "Every call and message enriches the customer profile with preferences and service history.", position: "left-4 top-36 h-64 w-[calc(100%-2rem)] lg:left-[330px] lg:top-32 lg:h-72 lg:w-[620px]" },
+  { nav: "ai-agent" as NavKey, title: "Voice and text agents", description: "Manage incoming calls, outgoing reminders, WhatsApp, SMS, and email from one guided module.", position: "left-4 top-40 h-72 w-[calc(100%-2rem)] lg:left-[330px] lg:top-30 lg:h-[420px] lg:w-[620px]" },
+  { nav: "dashboard" as NavKey, title: "Automation activation", description: "Automation cards show birthday wishes, follow-ups, feedback, and report-ready workflows.", position: "left-4 top-[420px] h-72 w-[calc(100%-2rem)] lg:left-[860px] lg:top-[620px] lg:h-72 lg:w-[520px]" },
+  { nav: "reports" as NavKey, title: "Reports and exports", description: "Open analysis, export PDFs, and review transcripts or recordings for client-ready proof.", position: "left-4 top-36 h-64 w-[calc(100%-2rem)] lg:left-[330px] lg:top-32 lg:h-72 lg:w-[620px]" },
+  { nav: "business" as NavKey, title: "AI settings and business profile", description: "Keep billing, branding, AI voice settings, and service configuration in one admin area.", position: "left-4 top-36 h-64 w-[calc(100%-2rem)] lg:left-[330px] lg:top-32 lg:h-72 lg:w-[620px]" },
+];
+
+const smartEmptyStates = [
+  { title: "No clients yet", description: "Add your first customer and the CRM will start building communication memory.", cta: "Add client", icon: Users2 },
+  { title: "No calls yet", description: "Start a test AI call to see transcript, recording, sentiment, and summary.", cta: "Test call", icon: PhoneCall },
+  { title: "No automations yet", description: "Create your first smart reminder workflow for missed calls or reports.", cta: "Create flow", icon: Workflow },
+  { title: "No reports yet", description: "Export a daily summary after calls, messages, and reminders are available.", cta: "Export report", icon: FileText },
+  { title: "No messages yet", description: "Send a WhatsApp, SMS, or email to start a clean client timeline.", cta: "Send message", icon: MessageSquareText },
+];
+
+const demoTranscript = [
+  { speaker: "Customer", text: "Hi, is my blood report ready?" },
+  { speaker: "AI Receptionist", text: "Yes, your report is ready. Would you like to visit tomorrow or receive a WhatsApp reminder?" },
+  { speaker: "Customer", text: "Please send a WhatsApp reminder for tomorrow morning." },
+  { speaker: "AI Receptionist", text: "Done. I have scheduled the reminder and updated your CRM note." },
+];
+
 const clients = [
   {
     name: "Anika Sharma",
@@ -338,6 +396,14 @@ export default function WorkspacePage() {
   const [selectedReport, setSelectedReport] = useState<ReportItem | null>(null);
   const [selectedTranscript, setSelectedTranscript] = useState<VoiceCallItem | null>(null);
   const [selectedRecording, setSelectedRecording] = useState<VoiceCallItem | null>(null);
+  const [welcomeOpen, setWelcomeOpen] = useState(false);
+  const [wizardOpen, setWizardOpen] = useState(false);
+  const [wizardStep, setWizardStep] = useState(0);
+  const [tourOpen, setTourOpen] = useState(false);
+  const [tourStep, setTourStep] = useState(0);
+  const [helpOpen, setHelpOpen] = useState(false);
+  const [aiDemoOpen, setAiDemoOpen] = useState(false);
+  const [demoStarted, setDemoStarted] = useState(false);
 
   useEffect(() => {
     const stored = window.localStorage.getItem(ONBOARDING_STORAGE_KEY);
@@ -348,12 +414,75 @@ export default function WorkspacePage() {
     setAllowed(true);
   }, [router]);
 
+  useEffect(() => {
+    if (!allowed) {
+      return;
+    }
+
+    const productOnboarding = window.localStorage.getItem(PRODUCT_ONBOARDING_KEY);
+    if (productOnboarding !== "seen") {
+      const timer = window.setTimeout(() => setWelcomeOpen(true), 450);
+      return () => window.clearTimeout(timer);
+    }
+  }, [allowed]);
+
+  useEffect(() => {
+    if (!tourOpen) {
+      return;
+    }
+
+    setActiveNav(tourSteps[tourStep].nav);
+  }, [tourOpen, tourStep]);
+
+  useEffect(() => {
+    if (!aiDemoOpen) {
+      setDemoStarted(false);
+      return;
+    }
+
+    const timer = window.setTimeout(() => setDemoStarted(true), 650);
+    return () => window.clearTimeout(timer);
+  }, [aiDemoOpen]);
+
+  const markOnboardingSeen = () => {
+    window.localStorage.setItem(PRODUCT_ONBOARDING_KEY, "seen");
+    setWelcomeOpen(false);
+  };
+
+  const startSetup = () => {
+    markOnboardingSeen();
+    setWizardOpen(true);
+  };
+
+  const exploreDemo = () => {
+    markOnboardingSeen();
+    setActiveNav("dashboard");
+  };
+
+  const startTour = () => {
+    setTourStep(0);
+    setTourOpen(true);
+  };
+
+  const closeTour = () => {
+    setTourOpen(false);
+    setTourStep(0);
+  };
+
+  const completeWizard = () => {
+    setWizardOpen(false);
+    setWizardStep(wizardSteps.length - 1);
+    setAiDemoOpen(true);
+  };
+
   const quickActions = useMemo(
     () => [
       { label: "New Call", icon: PhoneCall, onClick: () => setNewCallOpen(true) },
       { label: "Add Client", icon: UserPlus, onClick: () => setAddClientOpen(true) },
       { label: "Add Service", icon: Package2, onClick: () => setSelectedService(services[0]) },
       { label: "Send Message", icon: MessageCircleMore, onClick: () => setActiveNav("ai-agent") },
+      { label: "Test AI Receptionist", icon: Headphones, onClick: () => setAiDemoOpen(true) },
+      { label: "Product Tour", icon: Rocket, onClick: startTour },
     ],
     [],
   );
@@ -429,7 +558,7 @@ export default function WorkspacePage() {
               </Card>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
               {quickActions.map((action) => (
                 <button
                   key={action.label}
@@ -461,6 +590,13 @@ export default function WorkspacePage() {
             </div> */}
 
             <TabsContent value="dashboard" className="space-y-5">
+              <ActivationChecklist
+                items={checklistItems}
+                onNavigate={(nav) => setActiveNav(nav)}
+                onRunDemo={() => setAiDemoOpen(true)}
+                onOpenWizard={() => setWizardOpen(true)}
+              />
+
               <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                 {kpiCards.map((item) => (
                   <Card key={item.label} className="rounded-[1.8rem] border border-slate-200/75 bg-white/92 shadow-[0_18px_70px_rgba(122,146,186,0.14)]">
@@ -578,6 +714,14 @@ export default function WorkspacePage() {
                   </CardContent>
                 </Card>
               </section>
+
+              <SmartEmptyStates
+                states={smartEmptyStates}
+                onAddClient={() => setAddClientOpen(true)}
+                onTestCall={() => setAiDemoOpen(true)}
+                onMessage={() => setActiveNav("ai-agent")}
+                onReport={() => setActiveNav("reports")}
+              />
             </TabsContent>
 
             <TabsContent value="ai-agent" className="space-y-5">
@@ -943,6 +1087,49 @@ export default function WorkspacePage() {
         </DialogContent>
       </Dialog>
 
+      <WelcomeOnboardingDialog
+        open={welcomeOpen}
+        onOpenChange={setWelcomeOpen}
+        onStartSetup={startSetup}
+        onExploreDemo={exploreDemo}
+      />
+
+      <SetupWizardDialog
+        open={wizardOpen}
+        currentStep={wizardStep}
+        onOpenChange={setWizardOpen}
+        onBack={() => setWizardStep((step) => Math.max(step - 1, 0))}
+        onNext={() => {
+          if (wizardStep === wizardSteps.length - 1) {
+            completeWizard();
+            return;
+          }
+          setWizardStep((step) => Math.min(step + 1, wizardSteps.length - 1));
+        }}
+        onSkip={() => {
+          setWizardOpen(false);
+          startTour();
+        }}
+      />
+
+      <AiCallDemoDialog open={aiDemoOpen} demoStarted={demoStarted} onOpenChange={setAiDemoOpen} />
+
+      <ProductTourOverlay
+        open={tourOpen}
+        step={tourStep}
+        onClose={closeTour}
+        onPrevious={() => setTourStep((step) => Math.max(step - 1, 0))}
+        onNext={() => {
+          if (tourStep === tourSteps.length - 1) {
+            closeTour();
+            return;
+          }
+          setTourStep((step) => Math.min(step + 1, tourSteps.length - 1));
+        }}
+      />
+
+      <FloatingHelpPanel open={helpOpen} onOpenChange={setHelpOpen} onStartTour={startTour} onOpenWizard={() => setWizardOpen(true)} />
+
       {selectedService && (
         <div className="fixed inset-0 z-50">
           <button type="button" aria-label="Close service drawer" className="absolute inset-0 bg-slate-950/35 backdrop-blur-sm" onClick={() => setSelectedService(null)} />
@@ -976,6 +1163,470 @@ export default function WorkspacePage() {
         </div>
       )}
     </main>
+  );
+}
+
+function WelcomeOnboardingDialog({
+  open,
+  onOpenChange,
+  onStartSetup,
+  onExploreDemo,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onStartSetup: () => void;
+  onExploreDemo: () => void;
+}) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="overflow-hidden border-white/20 bg-[#070b22] p-0 text-white sm:max-w-3xl">
+        <DialogHeader className="sr-only">
+          <DialogTitle>Welcome to AI Receptionist</DialogTitle>
+          <DialogDescription>Set up your AI-powered communication system in a few simple steps.</DialogDescription>
+        </DialogHeader>
+        <div className="relative grid gap-0 lg:grid-cols-[0.9fr_1.1fr]">
+          <div className="relative min-h-[280px] overflow-hidden bg-[radial-gradient(circle_at_30%_20%,rgba(34,211,238,0.28),transparent_32%),radial-gradient(circle_at_70%_70%,rgba(139,92,246,0.28),transparent_34%)] p-6">
+            <motion.div
+              animate={{ y: [0, -12, 0], rotate: [0, 2, 0] }}
+              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute left-1/2 top-1/2 flex h-36 w-36 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-[radial-gradient(circle,#7dd3fc_0%,#6366f1_52%,#1e1b4b_100%)] shadow-[0_0_80px_rgba(99,102,241,0.75)]"
+            >
+              <Bot className="h-14 w-14 text-white" />
+            </motion.div>
+            <motion.div
+              animate={{ x: [0, 12, 0], y: [0, -8, 0] }}
+              transition={{ duration: 4.4, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute right-6 top-8 rounded-[1.2rem] border border-white/15 bg-white/10 px-4 py-3 text-sm backdrop-blur-xl"
+            >
+              Incoming call
+            </motion.div>
+            <motion.div
+              animate={{ x: [0, -10, 0], y: [0, 10, 0] }}
+              transition={{ duration: 4.8, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute bottom-8 left-6 rounded-[1.2rem] border border-white/15 bg-white/10 px-4 py-3 text-sm backdrop-blur-xl"
+            >
+              WhatsApp reminder sent
+            </motion.div>
+            <div className="absolute bottom-7 right-8 flex items-end gap-1">
+              {Array.from({ length: 9 }).map((_, index) => (
+                <motion.span
+                  key={index}
+                  animate={{ height: [14, 38, 18] }}
+                  transition={{ duration: 0.9, repeat: Infinity, delay: index * 0.08 }}
+                  className="w-1.5 rounded-full bg-cyan-300"
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="p-6 sm:p-8">
+            <Badge className="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1 text-cyan-100">Guided setup</Badge>
+            <h2 className="mt-5 text-3xl font-semibold tracking-tight sm:text-4xl">Welcome to AI Receptionist</h2>
+            <p className="mt-4 text-base leading-7 text-white/70">
+              Let&apos;s set up your AI-powered communication system in a few simple steps.
+            </p>
+            <div className="mt-6 grid gap-3">
+              {["Voice AI setup", "WhatsApp + SMS routing", "CRM and automation starter data"].map((item) => (
+                <div key={item} className="flex items-center gap-3 rounded-[1.1rem] border border-white/10 bg-white/8 px-4 py-3">
+                  <CheckCircle2 className="h-4 w-4 text-cyan-300" />
+                  <span className="text-sm text-white/78">{item}</span>
+                </div>
+              ))}
+            </div>
+            <div className="mt-8 grid gap-3 sm:grid-cols-2">
+              <Button className="h-12 rounded-full bg-white text-slate-950 hover:bg-white/90" onClick={onStartSetup}>
+                Start Setup
+                <Rocket className="ml-2 h-4 w-4" />
+              </Button>
+              <Button variant="ghost" className="h-12 rounded-full border border-white/14 bg-white/8 text-white hover:bg-white/14" onClick={onExploreDemo}>
+                Explore Demo
+              </Button>
+            </div>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function SetupWizardDialog({
+  open,
+  currentStep,
+  onOpenChange,
+  onBack,
+  onNext,
+  onSkip,
+}: {
+  open: boolean;
+  currentStep: number;
+  onOpenChange: (open: boolean) => void;
+  onBack: () => void;
+  onNext: () => void;
+  onSkip: () => void;
+}) {
+  const step = wizardSteps[currentStep];
+  const Icon = step.icon;
+  const progress = Math.round(((currentStep + 1) / wizardSteps.length) * 100);
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-4xl overflow-hidden p-0">
+        <DialogHeader className="sr-only">
+          <DialogTitle>Setup wizard</DialogTitle>
+          <DialogDescription>Complete the AI Receptionist onboarding checklist.</DialogDescription>
+        </DialogHeader>
+        <div className="grid lg:grid-cols-[0.8fr_1.2fr]">
+          <aside className="bg-[linear-gradient(180deg,#10163a,#123b66)] p-6 text-white sm:p-8">
+            <p className="text-sm font-semibold text-cyan-100/80">Setup progress</p>
+            <h2 className="mt-3 text-3xl font-semibold">Launch your AI front desk</h2>
+            <Progress value={progress} className="mt-6 h-2 bg-white/12" />
+            <p className="mt-3 text-sm text-white/64">{progress}% complete</p>
+            <div className="mt-8 space-y-3">
+              {wizardSteps.map((item, index) => (
+                <div key={item.title} className={`flex items-center gap-3 rounded-[1rem] px-3 py-2 ${index === currentStep ? "bg-white/12" : "bg-transparent"}`}>
+                  {index < currentStep ? <CheckCircle2 className="h-4 w-4 text-cyan-300" /> : <Circle className="h-4 w-4 text-white/45" />}
+                  <span className={index <= currentStep ? "text-sm text-white" : "text-sm text-white/45"}>{item.title}</span>
+                </div>
+              ))}
+            </div>
+          </aside>
+
+          <section className="p-6 sm:p-8">
+            <div className="flex items-start gap-4">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[1.3rem] bg-indigo-50 text-indigo-600">
+                <Icon className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-indigo-600">Step {currentStep + 1} of {wizardSteps.length}</p>
+                <h3 className="mt-1 text-2xl font-semibold text-slate-950">{step.title}</h3>
+                <p className="mt-2 text-sm leading-7 text-slate-500">{step.description}</p>
+              </div>
+            </div>
+
+            <div className="mt-8 space-y-4">
+              <label className="text-sm font-semibold text-slate-800">{step.field}</label>
+              {currentStep === 2 ? (
+                <Textarea defaultValue="Speak clearly, greet warmly, confirm intent, and offer WhatsApp follow-up after every missed call." className="min-h-32 rounded-[1.4rem]" />
+              ) : (
+                <Input defaultValue={step.value} className="h-12 rounded-full" />
+              )}
+              <div className="rounded-[1.4rem] border border-indigo-100 bg-indigo-50/70 p-4">
+                <p className="text-sm font-semibold text-indigo-950">Smart suggestion</p>
+                <p className="mt-2 text-sm leading-7 text-indigo-900/70">
+                  Use a short, friendly setup first. You can make it more advanced after the demo workspace is active.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
+              <Button variant="ghost" className="rounded-full border border-slate-200 bg-white text-slate-700" onClick={onSkip}>
+                Skip for now
+              </Button>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Button variant="ghost" className="rounded-full border border-slate-200 bg-white text-slate-700" onClick={onBack} disabled={currentStep === 0}>
+                  Back
+                </Button>
+                <Button className="rounded-full bg-[#5b49e8] text-white hover:bg-[#5341de]" onClick={onNext}>
+                  {currentStep === wizardSteps.length - 1 ? "Test AI Call" : "Save & Next"}
+                </Button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function ProductTourOverlay({
+  open,
+  step,
+  onClose,
+  onPrevious,
+  onNext,
+}: {
+  open: boolean;
+  step: number;
+  onClose: () => void;
+  onPrevious: () => void;
+  onNext: () => void;
+}) {
+  const item = tourSteps[step];
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[70] pointer-events-none">
+          <div className="absolute inset-0 bg-slate-950/68 backdrop-blur-[2px]" />
+          <motion.div
+            layout
+            className={`absolute rounded-[2rem] border-2 border-cyan-300/90 bg-transparent shadow-[0_0_0_9999px_rgba(2,6,23,0.58),0_0_48px_rgba(34,211,238,0.45)] ${item.position}`}
+          />
+          <motion.div
+            initial={{ y: 24, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 24, opacity: 0 }}
+            className="pointer-events-auto fixed inset-x-4 bottom-6 rounded-[1.7rem] border border-white/12 bg-white p-5 text-slate-950 shadow-[0_24px_90px_rgba(15,23,42,0.35)] sm:left-auto sm:right-6 sm:w-[420px]"
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-sm font-semibold text-indigo-600">Product tour · {step + 1}/{tourSteps.length}</p>
+                <h3 className="mt-2 text-xl font-semibold">{item.title}</h3>
+                <p className="mt-2 text-sm leading-7 text-slate-500">{item.description}</p>
+              </div>
+              <button type="button" onClick={onClose} className="rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700" aria-label="Close tour">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="mt-5 flex items-center justify-between gap-3">
+              <Button variant="ghost" className="rounded-full border border-slate-200 bg-white text-slate-700" onClick={onPrevious} disabled={step === 0}>
+                Previous
+              </Button>
+              <Button className="rounded-full bg-[#070b22] text-white hover:bg-[#111a37]" onClick={onNext}>
+                {step === tourSteps.length - 1 ? "Finish tour" : "Next"}
+              </Button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+function ActivationChecklist({
+  items,
+  onNavigate,
+  onRunDemo,
+  onOpenWizard,
+}: {
+  items: typeof checklistItems;
+  onNavigate: (nav: NavKey) => void;
+  onRunDemo: () => void;
+  onOpenWizard: () => void;
+}) {
+  const completed = items.filter((item) => item.complete).length;
+  const progress = Math.round((completed / items.length) * 100);
+
+  return (
+    <Card className="overflow-hidden rounded-[1.9rem] border border-slate-200/75 bg-white/92 shadow-[0_18px_70px_rgba(122,146,186,0.14)]">
+      <CardContent className="grid gap-5 p-5 sm:p-6 xl:grid-cols-[0.85fr_1.15fr]">
+        <div>
+          <Badge className="rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1 text-indigo-700">Activation checklist</Badge>
+          <h2 className="mt-4 text-2xl font-semibold text-slate-950">Finish setup faster with guided tasks.</h2>
+          <p className="mt-3 text-sm leading-7 text-slate-500">Track the actions that make the AI receptionist demo feel real for a client walkthrough.</p>
+          <div className="mt-5">
+            <Progress value={progress} className="h-2 bg-slate-100" />
+            <p className="mt-2 text-sm font-medium text-slate-600">{progress}% activated · {completed}/{items.length} complete</p>
+          </div>
+          <div className="mt-5 flex flex-wrap gap-2">
+            <Button className="rounded-full bg-[#5b49e8] text-white hover:bg-[#5341de]" onClick={onOpenWizard}>Open setup wizard</Button>
+            <Button variant="ghost" className="rounded-full border border-slate-200 bg-white text-slate-700" onClick={onRunDemo}>Test AI call</Button>
+          </div>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {items.map((item) => (
+            <button
+              key={item.title}
+              type="button"
+              onClick={() => onNavigate(item.nav)}
+              className="rounded-[1.3rem] border border-slate-200/80 bg-slate-50/80 p-4 text-left transition hover:-translate-y-0.5 hover:bg-white"
+            >
+              <div className="flex items-start gap-3">
+                {item.complete ? <CheckCircle2 className="mt-0.5 h-5 w-5 text-emerald-500" /> : <Circle className="mt-0.5 h-5 w-5 text-slate-300" />}
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">{item.title}</p>
+                  <p className="mt-1 text-xs text-indigo-600">{item.cta}</p>
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function SmartEmptyStates({
+  states,
+  onAddClient,
+  onTestCall,
+  onMessage,
+  onReport,
+}: {
+  states: typeof smartEmptyStates;
+  onAddClient: () => void;
+  onTestCall: () => void;
+  onMessage: () => void;
+  onReport: () => void;
+}) {
+  const actionMap: Record<string, () => void> = {
+    "Add client": onAddClient,
+    "Test call": onTestCall,
+    "Send message": onMessage,
+    "Export report": onReport,
+    "Create flow": onMessage,
+  };
+
+  return (
+    <Card className="rounded-[1.9rem] border border-slate-200/75 bg-white/92">
+      <CardContent className="p-5 sm:p-6">
+        <PanelHeader icon={Sparkles} title="Smart empty states" subtitle="Helpful starter screens for new clients, calls, messages, automations, and reports." />
+        <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+          {states.map((state) => {
+            const Icon = state.icon;
+            return (
+              <div key={state.title} className="rounded-[1.5rem] border border-dashed border-slate-300 bg-slate-50/80 p-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-indigo-600 shadow-sm">
+                  <Icon className="h-5 w-5" />
+                </div>
+                <p className="mt-4 text-sm font-semibold text-slate-900">{state.title}</p>
+                <p className="mt-2 text-sm leading-6 text-slate-500">{state.description}</p>
+                <Button size="sm" variant="ghost" className="mt-4 rounded-full border border-slate-200 bg-white text-slate-700" onClick={actionMap[state.cta]}>
+                  {state.cta}
+                </Button>
+              </div>
+            );
+          })}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function AiCallDemoDialog({
+  open,
+  demoStarted,
+  onOpenChange,
+}: {
+  open: boolean;
+  demoStarted: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-3xl overflow-hidden p-0">
+        <DialogHeader className="sr-only">
+          <DialogTitle>Test AI Receptionist</DialogTitle>
+          <DialogDescription>Simulated incoming call with live transcript and AI summary.</DialogDescription>
+        </DialogHeader>
+        <div className="grid lg:grid-cols-[0.86fr_1.14fr]">
+          <section className="bg-[linear-gradient(180deg,#070b22,#123b66)] p-6 text-white sm:p-8">
+            <Badge className="rounded-full border border-cyan-300/20 bg-cyan-300/10 text-cyan-100">Incoming call simulation</Badge>
+            <h2 className="mt-5 text-3xl font-semibold">Test AI Receptionist</h2>
+            <p className="mt-3 text-sm leading-7 text-white/70">Watch the AI answer, transcribe, respond, and generate the summary in a demo-safe flow.</p>
+            <div className="mt-8 flex items-center gap-4">
+              <motion.div animate={{ scale: [1, 1.08, 1] }} transition={{ duration: 1.4, repeat: Infinity }} className="flex h-20 w-20 items-center justify-center rounded-full bg-cyan-300/15 text-cyan-200">
+                <PhoneIncoming className="h-8 w-8" />
+              </motion.div>
+              <div>
+                <p className="text-sm text-white/55">Caller</p>
+                <p className="text-lg font-semibold">Anika Sharma</p>
+                <p className="text-sm text-white/55">Report status enquiry</p>
+              </div>
+            </div>
+            <div className="mt-8 flex h-16 items-end gap-1.5">
+              {Array.from({ length: 24 }).map((_, index) => (
+                <motion.span
+                  key={index}
+                  animate={{ height: demoStarted ? [18, 46, 22] : 16 }}
+                  transition={{ duration: 0.8, repeat: Infinity, delay: index * 0.04 }}
+                  className="w-full rounded-full bg-gradient-to-t from-indigo-400 to-cyan-300"
+                />
+              ))}
+            </div>
+          </section>
+          <section className="p-6 sm:p-8">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <h3 className="text-2xl font-semibold text-slate-950">Live transcript</h3>
+                <p className="mt-1 text-sm text-slate-500">Realtime chat-style call view</p>
+              </div>
+              <Badge className={demoStarted ? "rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700" : "rounded-full border border-amber-200 bg-amber-50 text-amber-700"}>
+                {demoStarted ? "AI speaking" : "Connecting"}
+              </Badge>
+            </div>
+            <div className="mt-5 space-y-3">
+              {demoTranscript.map((line, index) => (
+                <motion.div
+                  key={`${line.speaker}-${line.text}`}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={demoStarted ? { opacity: 1, y: 0 } : { opacity: index === 0 ? 1 : 0.2, y: 0 }}
+                  transition={{ delay: demoStarted ? index * 0.45 : 0, duration: 0.35 }}
+                  className={line.speaker === "AI Receptionist" ? "ml-6 rounded-[1.3rem] bg-indigo-50 p-4" : "mr-6 rounded-[1.3rem] bg-slate-50 p-4"}
+                >
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">{line.speaker}</p>
+                  <p className="mt-2 text-sm leading-7 text-slate-800">{line.text}</p>
+                </motion.div>
+              ))}
+            </div>
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={demoStarted ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }} className="mt-5 rounded-[1.4rem] border border-emerald-200 bg-emerald-50 p-4">
+              <p className="text-sm font-semibold text-emerald-900">AI summary generated</p>
+              <p className="mt-2 text-sm leading-7 text-emerald-800/75">Customer confirmed report pickup reminder for tomorrow morning. WhatsApp reminder queued and CRM note updated.</p>
+            </motion.div>
+          </section>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function FloatingHelpPanel({
+  open,
+  onOpenChange,
+  onStartTour,
+  onOpenWizard,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onStartTour: () => void;
+  onOpenWizard: () => void;
+}) {
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => onOpenChange(!open)}
+        className="fixed bottom-24 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[#070b22] text-white shadow-[0_18px_50px_rgba(15,23,42,0.32)] lg:bottom-8"
+        aria-label="Open help center"
+      >
+        <HelpCircle className="h-6 w-6" />
+      </button>
+      <AnimatePresence>
+        {open && (
+          <motion.aside
+            initial={{ opacity: 0, y: 18, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 18, scale: 0.96 }}
+            className="fixed bottom-40 right-4 z-50 w-[calc(100%-2rem)] max-w-sm rounded-[1.8rem] border border-slate-200 bg-white p-5 shadow-[0_24px_90px_rgba(15,23,42,0.24)] lg:bottom-24"
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-sm font-semibold text-indigo-600">Help center</p>
+                <h3 className="mt-1 text-xl font-semibold text-slate-950">Setup support</h3>
+              </div>
+              <button type="button" onClick={() => onOpenChange(false)} className="rounded-full p-2 text-slate-400 hover:bg-slate-100" aria-label="Close help center">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="mt-5 space-y-3">
+              {[
+                { title: "Run product tour", text: "See dashboard, calls, CRM, reports, and AI settings.", icon: Rocket, action: onStartTour },
+                { title: "Resume setup wizard", text: "Continue Twilio, WhatsApp, voice, and automation setup.", icon: Settings2, action: onOpenWizard },
+                { title: "Contact support", text: "Ask for help configuring live providers.", icon: LifeBuoy, action: () => onOpenChange(false) },
+              ].map((item) => (
+                <button key={item.title} type="button" onClick={item.action} className="flex w-full items-start gap-3 rounded-[1.2rem] border border-slate-200 bg-slate-50 p-4 text-left transition hover:bg-white">
+                  <item.icon className="mt-0.5 h-5 w-5 text-indigo-600" />
+                  <span>
+                    <span className="block text-sm font-semibold text-slate-900">{item.title}</span>
+                    <span className="mt-1 block text-sm leading-6 text-slate-500">{item.text}</span>
+                  </span>
+                </button>
+              ))}
+            </div>
+          </motion.aside>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
 
