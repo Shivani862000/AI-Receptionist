@@ -20,6 +20,7 @@ import {
   PhoneCall,
   PhoneIncoming,
   PhoneOutgoing,
+  Play,
   Plus,
   Receipt,
   ScanText,
@@ -29,10 +30,23 @@ import {
   Stethoscope,
   UserPlus,
   Users2,
+  Volume2,
   WandSparkles,
   Workflow,
   X,
 } from "lucide-react";
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  Cell,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 import {
   Dialog,
@@ -70,6 +84,19 @@ type ReportItem = {
   status: string;
 };
 
+type VoiceCallItem = {
+  id: string;
+  customer: string;
+  phone: string;
+  type: string;
+  duration: string;
+  sentiment: string;
+  sentimentTone: string;
+  transcriptPreview: string;
+  summary: string;
+  transcript: Array<{ speaker: string; text: string }>;
+};
+
 const sidebarItems: Array<{ key: NavKey; label: string; icon: typeof BarChart3 }> = [
   { key: "dashboard", label: "Dashboard", icon: BarChart3 },
   { key: "ai-agent", label: "AI Agent", icon: Bot },
@@ -87,6 +114,7 @@ const kpiCards = [
   { label: "SMS", value: "618", detail: "Delivery healthy", tone: "from-amber-500 via-orange-500 to-rose-500", icon: MessagesSquare },
   { label: "Emails", value: "274", detail: "Open rate 63%", tone: "from-cyan-500 via-blue-500 to-indigo-500", icon: Mail },
   { label: "Pending Follow-ups", value: "146", detail: "Needs scheduling", tone: "from-rose-500 via-orange-500 to-amber-500", icon: BellRing },
+  { label: "AI Insights", value: "28", detail: "6 new suggestions", tone: "from-fuchsia-500 via-violet-500 to-indigo-500", icon: Sparkles },
 ];
 
 const voiceAgentCards = [
@@ -101,6 +129,103 @@ const textAgentCards = [
   { title: "WhatsApp", status: "Connected", description: "Templates, reminders, and reply handling for active clients.", icon: MessageCircleMore, cta: "Open WhatsApp" },
   { title: "SMS", status: "Connected", description: "Short transactional updates for reminders and payment nudges.", icon: MessagesSquare, cta: "Send SMS" },
   { title: "Email", status: "Connected", description: "Long-form follow-ups, reports, and newsletter communication.", icon: Mail, cta: "Open email" },
+];
+
+const detailedVoiceCalls: VoiceCallItem[] = [
+  {
+    id: "call-001",
+    customer: "Anika Sharma",
+    phone: "+91 98765 12001",
+    type: "Incoming call",
+    duration: "04:32",
+    sentiment: "Positive",
+    sentimentTone: "text-emerald-700 bg-emerald-50 border-emerald-200",
+    transcriptPreview: "Asked if her report is ready and requested tomorrow pickup details.",
+    summary: "Customer confirmed report pickup for tomorrow and asked for a WhatsApp reminder.",
+    transcript: [
+      { speaker: "Customer", text: "Is my report ready for pickup?" },
+      { speaker: "AI", text: "Yes, your report is ready. Would you like to visit tomorrow?" },
+      { speaker: "Customer", text: "Yes, please send me a reminder on WhatsApp." },
+    ],
+  },
+  {
+    id: "call-002",
+    customer: "Rahul Bedi",
+    phone: "+91 98111 88221",
+    type: "Feedback call",
+    duration: "03:09",
+    sentiment: "Neutral",
+    sentimentTone: "text-amber-700 bg-amber-50 border-amber-200",
+    transcriptPreview: "Mentioned wait time but said staff support was helpful.",
+    summary: "Customer feedback was logged and a priority slot was suggested for the next visit.",
+    transcript: [
+      { speaker: "AI", text: "How was your appointment experience today?" },
+      { speaker: "Customer", text: "The wait was long, but the team helped me well." },
+      { speaker: "AI", text: "I have noted this and added a priority slot suggestion." },
+    ],
+  },
+  {
+    id: "call-003",
+    customer: "Noor Diagnostics",
+    phone: "+91 98200 78091",
+    type: "Report status call",
+    duration: "05:16",
+    sentiment: "Positive",
+    sentimentTone: "text-emerald-700 bg-emerald-50 border-emerald-200",
+    transcriptPreview: "Confirmed report-ready status and same-day pickup window.",
+    summary: "Clinic confirmed report pickup at 5 PM and requested recurring status alerts.",
+    transcript: [
+      { speaker: "AI", text: "Your reports are ready for pickup today." },
+      { speaker: "Client", text: "Please schedule pickup around 5 PM." },
+      { speaker: "AI", text: "Done. I have also saved this preference for future reports." },
+    ],
+  },
+  {
+    id: "call-004",
+    customer: "Vikram Nair",
+    phone: "+91 99876 77654",
+    type: "Reminder call",
+    duration: "02:41",
+    sentiment: "Needs follow-up",
+    sentimentTone: "text-rose-700 bg-rose-50 border-rose-200",
+    transcriptPreview: "Asked to reschedule again and requested a callback next week.",
+    summary: "Customer postponed due to travel. Manual retention callback recommended.",
+    transcript: [
+      { speaker: "AI", text: "I am calling to remind you about your appointment tomorrow." },
+      { speaker: "Customer", text: "I am traveling. Can someone call me next week?" },
+      { speaker: "AI", text: "I have scheduled a team callback for next week." },
+    ],
+  },
+];
+
+const automationCards = [
+  { title: "Birthday wishes", status: "Healthy", count: "182 active", description: "Sends birthday greetings with optional offer coupons.", trigger: "Daily at 8:30 AM", outcome: "22% voucher use", tone: "from-pink-500 to-rose-500" },
+  { title: "Follow-up reminders", status: "Running", count: "96 active", description: "Rescues missed enquiries and inactive consultation leads.", trigger: "8 minutes after no reply", outcome: "34% callback booked", tone: "from-indigo-500 to-violet-500" },
+  { title: "Feedback reminders", status: "Needs review", count: "47 active", description: "Collects post-service feedback and flags complaints.", trigger: "4 hours after service", outcome: "71% response rate", tone: "from-cyan-500 to-sky-500" },
+  { title: "Report notifications", status: "Healthy", count: "64 active", description: "Alerts customers when reports are ready for pickup.", trigger: "Report-ready status", outcome: "58% same-day pickup", tone: "from-emerald-500 to-teal-500" },
+];
+
+const callTrendData = [
+  { day: "Mon", calls: 340, messages: 480 },
+  { day: "Tue", calls: 390, messages: 520 },
+  { day: "Wed", calls: 420, messages: 610 },
+  { day: "Thu", calls: 376, messages: 580 },
+  { day: "Fri", calls: 461, messages: 720 },
+  { day: "Sat", calls: 298, messages: 430 },
+  { day: "Sun", calls: 243, messages: 310 },
+];
+
+const sentimentData = [
+  { name: "Positive", value: 62, color: "#10b981" },
+  { name: "Neutral", value: 24, color: "#f59e0b" },
+  { name: "Needs follow-up", value: 14, color: "#f43f5e" },
+];
+
+const recentActivity = [
+  { title: "Missed call followed up", detail: "WhatsApp sent after missed call. Customer booked a callback.", time: "2 min ago" },
+  { title: "Feedback batch completed", detail: "12 feedback requests sent. 9 replies received.", time: "14 min ago" },
+  { title: "Report notification delayed", detail: "South Mumbai report queue needs review.", time: "28 min ago" },
+  { title: "Client note added", detail: "Priya requested package pricing after the last call.", time: "54 min ago" },
 ];
 
 const clients = [
@@ -211,6 +336,8 @@ export default function WorkspacePage() {
   const [addClientOpen, setAddClientOpen] = useState(false);
   const [selectedService, setSelectedService] = useState<ServiceItem | null>(null);
   const [selectedReport, setSelectedReport] = useState<ReportItem | null>(null);
+  const [selectedTranscript, setSelectedTranscript] = useState<VoiceCallItem | null>(null);
+  const [selectedRecording, setSelectedRecording] = useState<VoiceCallItem | null>(null);
 
   useEffect(() => {
     const stored = window.localStorage.getItem(ONBOARDING_STORAGE_KEY);
@@ -334,8 +461,6 @@ export default function WorkspacePage() {
             </div> */}
 
             <TabsContent value="dashboard" className="space-y-5">
-            
-
               <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                 {kpiCards.map((item) => (
                   <Card key={item.label} className="rounded-[1.8rem] border border-slate-200/75 bg-white/92 shadow-[0_18px_70px_rgba(122,146,186,0.14)]">
@@ -355,6 +480,104 @@ export default function WorkspacePage() {
                   </Card>
                 ))}
               </section>
+
+              <section className="grid gap-5 xl:grid-cols-[1.12fr_0.88fr]">
+                <Card className="rounded-[1.9rem] border border-slate-200/75 bg-white/92">
+                  <CardContent className="p-5 sm:p-6">
+                    <PanelHeader icon={BarChart3} title="Call analytics" subtitle="Daily calls and message volume for this week." />
+                    <div className="mt-5 h-[280px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={callTrendData} margin={{ left: -20, right: 8, top: 8, bottom: 0 }}>
+                          <defs>
+                            <linearGradient id="callsGradient" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.34} />
+                              <stop offset="95%" stopColor="#4f46e5" stopOpacity={0.02} />
+                            </linearGradient>
+                            <linearGradient id="messagesGradient" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.28} />
+                              <stop offset="95%" stopColor="#06b6d4" stopOpacity={0.02} />
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid stroke="#e2e8f0" strokeDasharray="4 4" vertical={false} />
+                          <XAxis dataKey="day" tickLine={false} axisLine={false} tick={{ fill: "#64748b", fontSize: 12 }} />
+                          <YAxis tickLine={false} axisLine={false} tick={{ fill: "#64748b", fontSize: 12 }} />
+                          <Tooltip contentStyle={{ borderRadius: 14, border: "1px solid #e2e8f0" }} />
+                          <Area type="monotone" dataKey="calls" stroke="#4f46e5" strokeWidth={3} fill="url(#callsGradient)" />
+                          <Area type="monotone" dataKey="messages" stroke="#06b6d4" strokeWidth={3} fill="url(#messagesGradient)" />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="rounded-[1.9rem] border border-slate-200/75 bg-white/92">
+                  <CardContent className="p-5 sm:p-6">
+                    <PanelHeader icon={Sparkles} title="AI sentiment analytics" subtitle="Conversation tone across calls and messages." />
+                    <div className="mt-5 grid gap-5 sm:grid-cols-[180px_1fr] sm:items-center">
+                      <div className="h-[180px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <PieChart>
+                            <Pie data={sentimentData} innerRadius={54} outerRadius={78} paddingAngle={4} dataKey="value">
+                              {sentimentData.map((entry) => (
+                                <Cell key={entry.name} fill={entry.color} />
+                              ))}
+                            </Pie>
+                            <Tooltip contentStyle={{ borderRadius: 14, border: "1px solid #e2e8f0" }} />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      </div>
+                      <div className="space-y-3">
+                        {sentimentData.map((item) => (
+                          <div key={item.name} className="flex items-center justify-between rounded-[1.1rem] border border-slate-200 bg-slate-50 px-4 py-3">
+                            <div className="flex items-center gap-3">
+                              <span className="h-3 w-3 rounded-full" style={{ backgroundColor: item.color }} />
+                              <span className="text-sm font-medium text-slate-700">{item.name}</span>
+                            </div>
+                            <span className="text-sm font-semibold text-slate-950">{item.value}%</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </section>
+
+              <section className="grid gap-5 xl:grid-cols-[1fr_1fr]">
+                <Card className="rounded-[1.9rem] border border-slate-200/75 bg-white/92">
+                  <CardContent className="p-5 sm:p-6">
+                    <PanelHeader icon={CalendarDays} title="Recent activity" subtitle="Latest calls, reminders, and CRM updates." />
+                    <div className="mt-5 space-y-4">
+                      {recentActivity.map((item) => (
+                        <div key={item.title} className="rounded-[1.4rem] border border-slate-200/80 bg-slate-50/80 p-4">
+                          <div className="flex items-start justify-between gap-4">
+                            <div>
+                              <p className="text-sm font-semibold text-slate-900">{item.title}</p>
+                              <p className="mt-2 text-sm leading-7 text-slate-500">{item.detail}</p>
+                            </div>
+                            <span className="text-xs text-slate-400">{item.time}</span>
+                          </div>
+                        </div>
+                      ))}
+                      <EmptyState
+                        icon={ShieldCheck}
+                        title="No urgent escalations"
+                        description="All missed-call follow-ups and unhappy replies are assigned or resolved."
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="rounded-[1.9rem] border border-slate-200/75 bg-white/92">
+                  <CardContent className="p-5 sm:p-6">
+                    <PanelHeader icon={Workflow} title="Automation cards" subtitle="Dedicated reminder and notification flows." />
+                    <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                      {automationCards.map((automation) => (
+                        <AutomationCard key={automation.title} {...automation} />
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </section>
             </TabsContent>
 
             <TabsContent value="ai-agent" className="space-y-5">
@@ -373,6 +596,26 @@ export default function WorkspacePage() {
                             {voiceAgentCards.map((item) => (
                               <AgentCard key={item.title} {...item} />
                             ))}
+                          </div>
+                          <div className="mt-6 space-y-4">
+                            <PanelHeader icon={PhoneCall} title="Recent voice conversations" subtitle="Each call includes transcript, recording, and AI summary actions." />
+                            <div className="grid gap-4 xl:grid-cols-2">
+                              {detailedVoiceCalls.map((call) => (
+                                <VoiceCallCard
+                                  key={call.id}
+                                  call={call}
+                                  onTranscript={() => setSelectedTranscript(call)}
+                                  onRecording={() => setSelectedRecording(call)}
+                                  onSummary={() => setSelectedReport({
+                                    id: call.id,
+                                    title: `${call.customer} AI summary`,
+                                    description: call.summary,
+                                    stats: `${call.duration} call · ${call.sentiment}`,
+                                    status: call.type,
+                                  })}
+                                />
+                              ))}
+                            </div>
                           </div>
                         </TabsContent>
                         <TabsContent value="text">
@@ -649,6 +892,57 @@ export default function WorkspacePage() {
         </DialogContent>
       </Dialog>
 
+      <Dialog open={Boolean(selectedTranscript)} onOpenChange={(open) => !open && setSelectedTranscript(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{selectedTranscript?.customer} transcript</DialogTitle>
+            <DialogDescription>{selectedTranscript?.type} transcript preview with speaker timeline.</DialogDescription>
+          </DialogHeader>
+          <div className="mt-5 space-y-3">
+            {selectedTranscript?.transcript.map((line, index) => (
+              <div key={`${line.speaker}-${index}`} className="rounded-[1.3rem] border border-slate-200 bg-slate-50 p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">{line.speaker}</p>
+                <p className="mt-2 text-sm leading-7 text-slate-800">{line.text}</p>
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={Boolean(selectedRecording)} onOpenChange={(open) => !open && setSelectedRecording(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{selectedRecording?.customer} recording</DialogTitle>
+            <DialogDescription>{selectedRecording?.duration} simulated recording player for the POC.</DialogDescription>
+          </DialogHeader>
+          <div className="mt-5 space-y-5">
+            <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-950 text-white">
+                  <Volume2 className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-slate-950">{selectedRecording?.type}</p>
+                  <p className="text-sm text-slate-500">{selectedRecording?.phone}</p>
+                </div>
+              </div>
+              <div className="mt-5 flex h-16 items-end gap-1.5">
+                {Array.from({ length: 36 }).map((_, index) => (
+                  <span
+                    key={index}
+                    className="w-full rounded-full bg-gradient-to-t from-indigo-500 to-cyan-400"
+                    style={{ height: `${18 + ((index * 13) % 38)}px` }}
+                  />
+                ))}
+              </div>
+              <audio controls className="mt-5 w-full">
+                <source src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=" type="audio/wav" />
+              </audio>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {selectedService && (
         <div className="fixed inset-0 z-50">
           <button type="button" aria-label="Close service drawer" className="absolute inset-0 bg-slate-950/35 backdrop-blur-sm" onClick={() => setSelectedService(null)} />
@@ -733,6 +1027,108 @@ function AgentCard({
       <p className="mt-4 text-base font-semibold text-slate-900">{title}</p>
       <p className="mt-2 text-sm leading-7 text-slate-500">{description}</p>
       <Button size="sm" className="mt-4 rounded-full bg-[#070b22] text-white hover:bg-[#111a37]">{cta}</Button>
+    </div>
+  );
+}
+
+function VoiceCallCard({
+  call,
+  onTranscript,
+  onRecording,
+  onSummary,
+}: {
+  call: VoiceCallItem;
+  onTranscript: () => void;
+  onRecording: () => void;
+  onSummary: () => void;
+}) {
+  return (
+    <div className="rounded-[1.5rem] border border-slate-200/80 bg-slate-50/80 p-4">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="text-base font-semibold text-slate-900">{call.customer}</p>
+          <p className="mt-1 text-xs text-slate-400">{call.type} · {call.phone}</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600">{call.duration}</span>
+          <span className={`rounded-full border px-3 py-1 text-xs font-medium ${call.sentimentTone}`}>{call.sentiment}</span>
+        </div>
+      </div>
+      <p className="mt-4 text-sm leading-7 text-slate-600">{call.transcriptPreview}</p>
+      <div className="mt-4 grid gap-2 sm:grid-cols-3">
+        <Button size="sm" variant="ghost" className="rounded-full border border-slate-200 bg-white text-slate-700 hover:bg-slate-50" onClick={onRecording}>
+          <Play className="mr-1.5 h-3.5 w-3.5" />
+          Recording
+        </Button>
+        <Button size="sm" variant="ghost" className="rounded-full border border-slate-200 bg-white text-slate-700 hover:bg-slate-50" onClick={onTranscript}>
+          <FileText className="mr-1.5 h-3.5 w-3.5" />
+          Transcript
+        </Button>
+        <Button size="sm" className="rounded-full bg-[#070b22] text-white hover:bg-[#111a37]" onClick={onSummary}>
+          <Sparkles className="mr-1.5 h-3.5 w-3.5" />
+          AI summary
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function AutomationCard({
+  title,
+  status,
+  count,
+  description,
+  trigger,
+  outcome,
+  tone,
+}: {
+  title: string;
+  status: string;
+  count: string;
+  description: string;
+  trigger: string;
+  outcome: string;
+  tone: string;
+}) {
+  return (
+    <div className="rounded-[1.5rem] border border-slate-200/80 bg-slate-50/80 p-4">
+      <div className={`h-1.5 w-full rounded-full bg-gradient-to-r ${tone}`} />
+      <div className="mt-4 flex items-start justify-between gap-3">
+        <div>
+          <p className="text-base font-semibold text-slate-900">{title}</p>
+          <p className="mt-1 text-xs text-slate-400">{count}</p>
+        </div>
+        <Badge className="rounded-full border border-slate-200 bg-white text-slate-700">{status}</Badge>
+      </div>
+      <p className="mt-3 text-sm leading-7 text-slate-500">{description}</p>
+      <div className="mt-4 grid gap-3">
+        <DrawerMetric label="Trigger" value={trigger} />
+        <DrawerMetric label="Outcome" value={outcome} />
+      </div>
+    </div>
+  );
+}
+
+function EmptyState({
+  icon: Icon,
+  title,
+  description,
+}: {
+  icon: typeof ShieldCheck;
+  title: string;
+  description: string;
+}) {
+  return (
+    <div className="rounded-[1.4rem] border border-dashed border-slate-300 bg-white/70 p-4">
+      <div className="flex items-start gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700">
+          <Icon className="h-4 w-4" />
+        </div>
+        <div>
+          <p className="text-sm font-semibold text-slate-900">{title}</p>
+          <p className="mt-1 text-sm leading-6 text-slate-500">{description}</p>
+        </div>
+      </div>
     </div>
   );
 }
