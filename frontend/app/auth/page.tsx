@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -17,6 +18,14 @@ type StepKey = "login" | "otp" | "onboarding";
 type AuthMode = "login" | "signup";
 
 export default function AuthPage() {
+  return (
+    <Suspense fallback={<AuthLoading />}>
+      <AuthContent />
+    </Suspense>
+  );
+}
+
+function AuthContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [step, setStep] = useState<StepKey>("login");
@@ -250,4 +259,19 @@ function Highlight({
 
 function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function AuthLoading() {
+  return (
+    <main className="min-h-screen bg-[#050816] text-white">
+      <div className="mx-auto grid min-h-screen max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[1.02fr_0.98fr] lg:px-8">
+        <section className="rounded-[2.2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(11,18,37,0.96),rgba(14,24,48,0.92))] p-6 sm:p-8">
+          <div className="h-full min-h-[420px] animate-pulse rounded-[1.6rem] bg-white/6" />
+        </section>
+        <section className="rounded-[2.2rem] border border-slate-200/70 bg-white/95 p-5 sm:p-8">
+          <div className="h-64 animate-pulse rounded-[1.6rem] bg-slate-100" />
+        </section>
+      </div>
+    </main>
+  );
 }
