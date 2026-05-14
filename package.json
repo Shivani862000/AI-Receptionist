@@ -1,0 +1,16 @@
+{
+	"scripts": {
+		"demo:start": "node scripts/demo-start.mjs",
+		"demo:verify": "node scripts/demo-verify.mjs",
+		"demo:ready": "node scripts/demo-ready.mjs",
+		"demo:mode": "node scripts/demo-mode.mjs",
+		"demo:stop": "node scripts/demo-stop.mjs"
+	},
+	"dependencies": {
+		"@nestjs/websockets": "^11.1.19",
+		"@nestjs/platform-socket.io": "^11.1.19",
+		"socket.io": "^4.8.3",
+		"ws": "^8.20.0"
+	},
+	"packageManager": "pnpm@9.15.0+sha512.76e2379760a4328ec4415815bcd6628dee727af3779aaa4c914e3944156c4299921a89f976381ee107d41f12cfa4b66681ca9c718f0668fa0831ed4c6d8ba56c"
+}

@@ -1,0 +1,17 @@
+import { Injectable } from "@nestjs/common";
+
+import { PrismaService } from "../../prisma/prisma.service";
+
+@Injectable()
+export class PlansService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async findAll() {
+    const plans = await this.prisma.saaSPlan.findMany({
+      where: { isActive: true },
+      orderBy: { monthlyPrice: "asc" },
+    });
+
+    return { data: plans };
+  }
+}

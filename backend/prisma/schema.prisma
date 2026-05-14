@@ -1,0 +1,951 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  owner
+  admin
+  manager
+  operator
+  viewer
+  super_admin
+  business_admin
+  receptionist
+}
+
+enum MembershipStatus {
+  active
+  invited
+  suspended
+}
+
+enum OtpChannel {
+  sms
+  email
+  whatsapp
+}
+
+enum OtpStatus {
+  pending
+  verified
+  expired
+  failed
+}
+
+enum SessionStatus {
+  active
+  revoked
+  expired
+}
+
+enum ContactMode {
+  call
+  whatsapp
+  sms
+  email
+}
+
+enum Gender {
+  male
+  female
+  other
+  unknown
+}
+
+enum ClientStatus {
+  active
+  archived
+  deleted
+}
+
+enum CallDirection {
+  incoming
+  outgoing
+}
+
+enum CallType {
+  incoming_call
+  outgoing_call
+  feedback_call
+  reminder_call
+  report_status_call
+}
+
+enum CallStatus {
+  initiated
+  queued
+  started
+  ringing
+  in_progress
+  completed
+  failed
+  missed
+  canceled
+}
+
+enum SentimentLabel {
+  positive
+  neutral
+  negative
+  mixed
+}
+
+enum TranscriptSpeaker {
+  ai
+  client
+  agent
+  system
+}
+
+enum MessageChannel {
+  whatsapp
+  sms
+  email
+}
+
+enum MessageDirection {
+  inbound
+  outbound
+}
+
+enum MessageStatus {
+  queued
+  sent
+  delivered
+  read
+  failed
+  received
+}
+
+enum MessageTemplateType {
+  reminder
+  feedback
+  birthday
+  report_ready
+  follow_up
+}
+
+enum AutomationType {
+  birthday_wishes
+  follow_up_reminder
+  feedback_reminder
+  report_notification
+  custom
+}
+
+enum AutomationStatus {
+  enabled
+  disabled
+  draft
+}
+
+enum AutomationTriggerType {
+  birthday
+  appointment_reminder
+  follow_up
+  feedback_request
+  report_ready
+  missed_call
+  manual
+}
+
+enum AutomationChannel {
+  whatsapp
+  sms
+  email
+  voice_call
+}
+
+enum AutomationActionType {
+  send_message
+  make_call
+  send_email
+  send_sms
+}
+
+enum AutomationScheduleType {
+  instant
+  delayed
+  recurring
+}
+
+enum AutomationExecutionStatus {
+  pending
+  queued
+  running
+  success
+  failed
+  skipped
+  retrying
+}
+
+enum ReportType {
+  call_analytics
+  sentiment_analytics
+  daily_summary
+  client_follow_up
+}
+
+enum ReportStatus {
+  processing
+  completed
+  failed
+}
+
+enum ActivityType {
+  auth_login
+  auth_logout
+  client_created
+  client_updated
+  client_deleted
+  service_created
+  service_updated
+  call_created
+  call_updated
+  message_sent
+  message_received
+  automation_created
+  automation_updated
+  automation_executed
+  report_export_requested
+  ai_summary_generated
+}
+
+enum SubscriptionPlanName {
+  starter
+  professional
+  enterprise
+}
+
+enum SubscriptionStatus {
+  trialing
+  active
+  past_due
+  canceled
+}
+
+enum UsageMetricType {
+  call_minutes
+  whatsapp_messages
+  sms_messages
+  email_messages
+  ai_requests
+  stt_minutes
+  tts_characters
+  storage_mb
+}
+
+enum OnboardingStep {
+  create_business
+  select_plan
+  configure_ai
+  connect_twilio
+  configure_whatsapp
+  upload_business_info
+  test_ai_call
+}
+
+enum InvoiceStatus {
+  draft
+  issued
+  paid
+  overdue
+  canceled
+}
+
+enum PaymentStatus {
+  pending
+  succeeded
+  failed
+  refunded
+}
+
+enum NotificationType {
+  trial_ending
+  usage_limit_reached
+  payment_reminder
+  onboarding_incomplete
+  plan_upgraded
+}
+
+enum NotificationChannelType {
+  email
+  dashboard
+}
+
+enum NotificationStatus {
+  unread
+  read
+  sent
+  failed
+}
+
+model User {
+  id              String               @id @default(cuid())
+  fullName        String
+  email           String               @unique
+  phone           String               @unique
+  passwordHash    String
+  isActive        Boolean              @default(true)
+  lastLoginAt     DateTime?
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  memberships     BusinessMembership[]
+  otpRequests     OtpRequest[]
+  sessions        UserSession[]
+  requestedReports ReportExport[]
+  activityLogs    ActivityLog[]        @relation("ActorActivityLogs")
+  auditEntries    AuditLogEntry[]
+
+  @@index([email])
+  @@index([phone])
+}
+
+model Business {
+  id                    String               @id @default(cuid())
+  businessName          String
+  ownerName             String?
+  slug                  String               @unique
+  industry              String?
+  teamSize              String?
+  phone                 String?
+  email                 String?
+  address               String?
+  timezone              String               @default("UTC")
+  website               String?
+  primaryColor          String?
+  logoUrl               String?
+  isActive              Boolean              @default(true)
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+  memberships           BusinessMembership[]
+  clients               Client[]
+  services              Service[]
+  voiceCalls            VoiceCall[]
+  messages              Message[]
+  messageTemplates      MessageTemplate[]
+  automations           Automation[]
+  otpRequests           OtpRequest[]
+  userSessions          UserSession[]
+  automationExecutions  AutomationExecution[]
+  reportExports         ReportExport[]
+  activityLogs          ActivityLog[]
+  webhookEvents         WebhookEvent[]
+  subscriptions         BusinessSubscription[]
+  usageRecords          UsageRecord[]
+  onboardingProgress    BusinessOnboarding?
+  aiSettings            BusinessAISettings?
+  brandingSettings      BusinessBranding?
+  invoices              Invoice[]
+  payments              Payment[]
+  notifications         DashboardNotification[]
+  auditEntries          AuditLogEntry[]
+
+  @@index([businessName])
+  @@index([industry])
+}
+
+model SaaSPlan {
+  id                    String               @id @default(cuid())
+  name                  SubscriptionPlanName @unique
+  displayName           String
+  monthlyPrice          Decimal              @db.Decimal(12, 2)
+  includedMinutes       Int                  @default(0)
+  includedMessages      Int                  @default(0)
+  includedAIRequests    Int                  @default(0)
+  includedStorageMb     Int                  @default(0)
+  description           String?
+  isActive              Boolean              @default(true)
+  metadata              Json?
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+  subscriptions         BusinessSubscription[]
+}
+
+model BusinessMembership {
+  id              String           @id @default(cuid())
+  businessId      String
+  userId          String
+  role            UserRole
+  status          MembershipStatus @default(active)
+  isPrimary       Boolean          @default(false)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  business        Business         @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([businessId, userId])
+  @@index([userId])
+  @@index([businessId, role])
+}
+
+model BusinessSubscription {
+  id                    String               @id @default(cuid())
+  businessId            String
+  planId                String
+  planName              SubscriptionPlanName
+  status                SubscriptionStatus   @default(trialing)
+  monthlyPrice          Decimal              @db.Decimal(12, 2)
+  includedMinutes       Int                  @default(0)
+  includedMessages      Int                  @default(0)
+  includedAIRequests    Int                  @default(0)
+  includedStorageMb     Int                  @default(0)
+  currentPeriodStart    DateTime
+  currentPeriodEnd      DateTime
+  trialEndsAt           DateTime?
+  canceledAt            DateTime?
+  isCurrent             Boolean              @default(true)
+  metadata              Json?
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+  business              Business             @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  plan                  SaaSPlan             @relation(fields: [planId], references: [id], onDelete: Restrict)
+  invoices              Invoice[]
+
+  @@index([businessId, isCurrent])
+  @@index([planName, status])
+}
+
+model UsageRecord {
+  id                    String             @id @default(cuid())
+  businessId            String
+  metricType            UsageMetricType
+  monthKey              String
+  quantity              Float              @default(0)
+  unit                  String
+  warningThreshold      Float?
+  metadata              Json?
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+  business              Business           @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@unique([businessId, metricType, monthKey])
+  @@index([businessId, monthKey])
+}
+
+model BusinessOnboarding {
+  id                    String             @id @default(cuid())
+  businessId            String             @unique
+  currentStep           OnboardingStep     @default(create_business)
+  completedSteps        Json?
+  skippedSteps          Json?
+  isCompleted           Boolean            @default(false)
+  businessInfoUploaded  Boolean            @default(false)
+  twilioConnected       Boolean            @default(false)
+  whatsappConfigured    Boolean            @default(false)
+  testCallCompleted     Boolean            @default(false)
+  lastCompletedAt       DateTime?
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+  business              Business           @relation(fields: [businessId], references: [id], onDelete: Cascade)
+}
+
+model BusinessAISettings {
+  id                    String             @id @default(cuid())
+  businessId            String             @unique
+  tone                  String             @default("professional")
+  language              String             @default("en")
+  greetingMessage       String?
+  voiceSelection        String?
+  businessInstructions  String?
+  fallbackRules         Json?
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+  business              Business           @relation(fields: [businessId], references: [id], onDelete: Cascade)
+}
+
+model BusinessBranding {
+  id                    String             @id @default(cuid())
+  businessId            String             @unique
+  logoUrl               String?
+  brandColor            String?
+  businessName          String?
+  emailFooter           String?
+  pdfBranding           Json?
+  customDomain          String?
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+  business              Business           @relation(fields: [businessId], references: [id], onDelete: Cascade)
+}
+
+model OtpRequest {
+  id              String      @id @default(cuid())
+  userId          String?
+  businessId      String?
+  email           String?
+  phone           String?
+  channel         OtpChannel
+  otpCodeHash     String
+  status          OtpStatus   @default(pending)
+  expiresAt       DateTime
+  verifiedAt      DateTime?
+  attempts        Int         @default(0)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  user            User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  business        Business?   @relation(fields: [businessId], references: [id], onDelete: SetNull)
+
+  @@index([phone, status])
+  @@index([email, status])
+  @@index([expiresAt])
+}
+
+model UserSession {
+  id              String        @id @default(cuid())
+  userId          String
+  businessId      String?
+  refreshTokenHash String
+  status          SessionStatus @default(active)
+  ipAddress       String?
+  userAgent       String?
+  expiresAt       DateTime
+  lastUsedAt      DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  business        Business?     @relation(fields: [businessId], references: [id], onDelete: SetNull)
+
+  @@index([userId, status])
+  @@index([businessId])
+  @@index([expiresAt])
+}
+
+model Client {
+  id                    String            @id @default(cuid())
+  businessId            String
+  externalRef           String?
+  fullName              String
+  gender                Gender            @default(unknown)
+  phone                 String
+  whatsapp              String?
+  email                 String?
+  preferredContactMode  ContactMode?
+  preferredContactTime  String?
+  notes                 String?
+  birthday              DateTime?
+  anniversary           DateTime?
+  status                ClientStatus      @default(active)
+  lastInteractionAt     DateTime?
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  deletedAt             DateTime?
+  business              Business          @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  clientServices        ClientService[]
+  voiceCalls            VoiceCall[]
+  messages              Message[]
+  automationExecutions  AutomationExecution[]
+  activityLogs          ActivityLog[]     @relation("ClientActivityLogs")
+
+  @@index([businessId, fullName])
+  @@index([businessId, phone])
+  @@index([businessId, email])
+  @@index([businessId, status])
+}
+
+model Service {
+  id                    String          @id @default(cuid())
+  businessId            String
+  serviceName           String
+  serviceCode           String
+  description           String?
+  duration              Int?
+  price                 Decimal?        @db.Decimal(12, 2)
+  currency              String?         @db.VarChar(3)
+  isActive              Boolean         @default(true)
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+  business              Business        @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  clientServices        ClientService[]
+
+  @@unique([businessId, serviceName])
+  @@unique([businessId, serviceCode])
+  @@index([businessId, isActive])
+}
+
+model ClientService {
+  id              String      @id @default(cuid())
+  clientId        String
+  serviceId       String
+  startedAt       DateTime?
+  endedAt         DateTime?
+  notes           String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  client          Client      @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  service         Service     @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@unique([clientId, serviceId])
+  @@index([serviceId])
+}
+
+model VoiceCall {
+  id                    String            @id @default(cuid())
+  businessId            String
+  clientId              String?
+  callSid               String?
+  providerCallId        String?
+  externalCampaignRef   String?
+  direction             CallDirection
+  callType              CallType
+  status                CallStatus        @default(queued)
+  customerName          String?
+  customerPhone         String?
+  fromNumber            String
+  toNumber              String
+  startedAt             DateTime?
+  endedAt               DateTime?
+  durationSeconds       Int               @default(0)
+  recordingUrl          String?
+  transcriptId          String?
+  aiSummaryId           String?
+  transcriptStatus      String?
+  summaryStatus         String?
+  sentiment             SentimentLabel?
+  sentimentScore        Float?
+  webhookPayload        Json?
+  metadata              Json?
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  business              Business          @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  client                Client?           @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  transcriptSegments    CallTranscriptSegment[]
+  recording             CallRecording?
+  aiSummary             AICallSummary?
+  transcript            VoiceCallTranscript?
+  automationExecutions  AutomationExecution[]
+  activityLogs          ActivityLog[]     @relation("CallActivityLogs")
+
+  @@unique([businessId, callSid])
+  @@unique([businessId, providerCallId])
+  @@index([businessId, status])
+  @@index([businessId, direction, startedAt])
+  @@index([clientId, startedAt])
+  @@index([businessId, customerPhone])
+}
+
+model VoiceCallTranscript {
+  id                    String            @id @default(cuid())
+  voiceCallId           String            @unique
+  transcriptText        String
+  language              String?
+  confidence            Float?
+  provider              String?
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  voiceCall             VoiceCall         @relation(fields: [voiceCallId], references: [id], onDelete: Cascade)
+}
+
+model CallTranscriptSegment {
+  id                    String            @id @default(cuid())
+  callId                String
+  sequenceNumber        Int
+  speaker               TranscriptSpeaker
+  speakerLabel          String?
+  text                  String
+  startSecond           Float?
+  endSecond             Float?
+  confidence            Float?
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  call                  VoiceCall         @relation(fields: [callId], references: [id], onDelete: Cascade)
+
+  @@unique([callId, sequenceNumber])
+  @@index([callId, speaker])
+}
+
+model CallRecording {
+  id                    String            @id @default(cuid())
+  callId                String            @unique
+  recordingUrl          String?
+  provider              String?
+  storageProvider       String?
+  storagePath           String?
+  publicUrl             String?
+  durationSeconds       Int?
+  mimeType              String?
+  fileSizeBytes         Int?
+  expiresAt             DateTime?
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  call                  VoiceCall         @relation(fields: [callId], references: [id], onDelete: Cascade)
+}
+
+model AICallSummary {
+  id                    String            @id @default(cuid())
+  callId                String            @unique
+  summary               String?
+  summaryText           String
+  keyPoints             Json?
+  followUpRequired      Boolean           @default(false)
+  followUpSuggestion    String?
+  sentiment             SentimentLabel?
+  sentimentScore        Float?
+  modelName             String?
+  rawResponse           Json?
+  generatedAt           DateTime          @default(now())
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  call                  VoiceCall         @relation(fields: [callId], references: [id], onDelete: Cascade)
+
+  @@index([sentiment])
+}
+
+model WebhookEvent {
+  id                    String            @id @default(cuid())
+  businessId            String?
+  eventType             String
+  provider              String?
+  callSid               String?
+  payload               Json
+  createdAt             DateTime          @default(now())
+  business              Business?         @relation(fields: [businessId], references: [id], onDelete: SetNull)
+
+  @@index([businessId, eventType])
+  @@index([callSid])
+}
+
+model Message {
+  id                    String            @id @default(cuid())
+  businessId            String
+  clientId              String?
+  providerMessageId     String?
+  channel               MessageChannel
+  direction             MessageDirection
+  status                MessageStatus     @default(queued)
+  fromAddress           String
+  toAddress             String
+  subject               String?
+  bodyText              String?
+  bodyHtml              String?
+  previewText           String?
+  errorMessage          String?
+  sentAt                DateTime?
+  deliveredAt           DateTime?
+  receivedAt            DateTime?
+  readAt                DateTime?
+  metadata              Json?
+  webhookPayload        Json?
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  business              Business          @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  client                Client?           @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  automationExecutions  AutomationExecution[]
+  activityLogs          ActivityLog[]     @relation("MessageActivityLogs")
+
+  @@unique([businessId, providerMessageId])
+  @@index([businessId, channel, status])
+  @@index([clientId, createdAt])
+}
+
+model MessageTemplate {
+  id                    String              @id @default(cuid())
+  businessId            String
+  name                  String
+  channel               MessageChannel
+  templateType          MessageTemplateType
+  content               String
+  variables             Json?
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  business              Business            @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  automations           Automation[]
+
+  @@unique([businessId, name])
+  @@index([businessId, channel, templateType])
+}
+
+model Automation {
+  id                    String                     @id @default(cuid())
+  businessId            String
+  name                  String
+  description           String?
+  triggerType           AutomationTriggerType
+  channel               AutomationChannel
+  actionType            AutomationActionType
+  templateId            String?
+  scheduleType          AutomationScheduleType    @default(instant)
+  scheduleValue         String?
+  isActive              Boolean                   @default(true)
+  triggerConfig         Json?
+  templateRef           String?
+  executionRules        Json?
+  lastRunAt             DateTime?
+  nextRunAt             DateTime?
+  createdAt             DateTime                  @default(now())
+  updatedAt             DateTime                  @updatedAt
+  business              Business                  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  template              MessageTemplate?          @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  executions            AutomationExecution[]
+  activityLogs          ActivityLog[]             @relation("AutomationActivityLogs")
+
+  @@index([businessId, isActive])
+  @@index([businessId, triggerType])
+  @@index([businessId, channel, actionType])
+  @@index([templateId])
+}
+
+model AutomationExecution {
+  id                    String                     @id @default(cuid())
+  automationId          String
+  businessId            String
+  clientId              String?
+  voiceCallId           String?
+  messageId             String?
+  status                AutomationExecutionStatus @default(queued)
+  scheduledFor          DateTime?
+  startedAt             DateTime?
+  executedAt            DateTime?
+  completedAt           DateTime?
+  errorMessage          String?
+  retryCount            Int                        @default(0)
+  executionPayload      Json?
+  metadata              Json?
+  createdAt             DateTime                   @default(now())
+  updatedAt             DateTime                   @updatedAt
+  automation            Automation                 @relation(fields: [automationId], references: [id], onDelete: Cascade)
+  business              Business                   @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  client                Client?                    @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  voiceCall             VoiceCall?                 @relation(fields: [voiceCallId], references: [id], onDelete: SetNull)
+  message               Message?                   @relation(fields: [messageId], references: [id], onDelete: SetNull)
+
+  @@index([automationId, status])
+  @@index([businessId, scheduledFor])
+  @@index([businessId, status, scheduledFor])
+  @@index([clientId])
+}
+
+model ReportExport {
+  id                    String            @id @default(cuid())
+  businessId            String
+  requestedByUserId     String?
+  reportType            ReportType
+  status                ReportStatus      @default(processing)
+  dateFrom              DateTime?
+  dateTo                DateTime?
+  filters               Json?
+  fileUrl               String?
+  storagePath           String?
+  errorMessage          String?
+  requestedAt           DateTime          @default(now())
+  completedAt           DateTime?
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  business              Business          @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  requestedByUser       User?             @relation(fields: [requestedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([businessId, reportType, status])
+  @@index([requestedByUserId])
+}
+
+model Invoice {
+  id                    String               @id @default(cuid())
+  businessId            String
+  subscriptionId        String?
+  invoiceNumber         String               @unique
+  status                InvoiceStatus        @default(draft)
+  subtotal              Decimal              @db.Decimal(12, 2)
+  overageAmount         Decimal              @db.Decimal(12, 2) @default(0)
+  totalAmount           Decimal              @db.Decimal(12, 2)
+  currency              String               @default("INR")
+  dueDate               DateTime?
+  issuedAt              DateTime?
+  paidAt                DateTime?
+  metadata              Json?
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+  business              Business             @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  subscription          BusinessSubscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+  payments              Payment[]
+
+  @@index([businessId, status])
+}
+
+model Payment {
+  id                    String            @id @default(cuid())
+  businessId            String
+  invoiceId             String?
+  amount                Decimal           @db.Decimal(12, 2)
+  currency              String            @default("INR")
+  status                PaymentStatus     @default(pending)
+  provider              String?
+  providerReference     String?
+  paidAt                DateTime?
+  metadata              Json?
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  business              Business          @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  invoice               Invoice?          @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+
+  @@index([businessId, status])
+}
+
+model DashboardNotification {
+  id                    String                  @id @default(cuid())
+  businessId            String
+  type                  NotificationType
+  channel               NotificationChannelType
+  status                NotificationStatus      @default(unread)
+  title                 String
+  message               String
+  sentAt                DateTime?
+  readAt                DateTime?
+  metadata              Json?
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  business              Business                @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId, status, createdAt])
+}
+
+model AuditLogEntry {
+  id                    String            @id @default(cuid())
+  businessId            String
+  actorUserId           String?
+  action                String
+  entityType            String
+  entityId              String?
+  summary               String
+  payload               Json?
+  createdAt             DateTime          @default(now())
+  business              Business          @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  actorUser             User?             @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([businessId, action, createdAt])
+  @@index([actorUserId, createdAt])
+}
+
+model ActivityLog {
+  id                    String          @id @default(cuid())
+  businessId            String
+  actorUserId           String?
+  clientId              String?
+  voiceCallId           String?
+  messageId             String?
+  automationId          String?
+  entityType            String
+  entityId              String?
+  activityType          ActivityType
+  title                 String
+  description           String?
+  payload               Json?
+  ipAddress             String?
+  userAgent             String?
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+  business              Business        @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  actorUser             User?           @relation("ActorActivityLogs", fields: [actorUserId], references: [id], onDelete: SetNull)
+  client                Client?         @relation("ClientActivityLogs", fields: [clientId], references: [id], onDelete: SetNull)
+  voiceCall             VoiceCall?      @relation("CallActivityLogs", fields: [voiceCallId], references: [id], onDelete: SetNull)
+  message               Message?        @relation("MessageActivityLogs", fields: [messageId], references: [id], onDelete: SetNull)
+  automation            Automation?     @relation("AutomationActivityLogs", fields: [automationId], references: [id], onDelete: SetNull)
+
+  @@index([businessId, activityType, createdAt])
+  @@index([actorUserId, createdAt])
+  @@index([entityType, entityId])
+  @@index([clientId, createdAt])
+}

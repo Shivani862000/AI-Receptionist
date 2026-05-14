@@ -1,0 +1,2866 @@
+{
+  "info": {
+    "name": "AI Receptionist Local API",
+    "_postman_id": "f4f3fce0-7f56-4ce7-a02f-0d99a8ac7b41",
+    "description": "Local Phase 1 POC collection for auth, CRM, communications, voice pipeline, dashboard, reports, and webhook simulation.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:4000/api/v1"
+    },
+    {
+      "key": "frontendUrl",
+      "value": "http://localhost:3001"
+    },
+    {
+      "key": "email",
+      "value": "owner@clinic.com"
+    },
+    {
+      "key": "password",
+      "value": "password123"
+    },
+    {
+      "key": "accessToken",
+      "value": ""
+    },
+    {
+      "key": "businessId",
+      "value": ""
+    },
+    {
+      "key": "serviceId",
+      "value": ""
+    },
+    {
+      "key": "clientId",
+      "value": ""
+    },
+    {
+      "key": "textMessageId",
+      "value": ""
+    },
+    {
+      "key": "automationId",
+      "value": ""
+    },
+    {
+      "key": "reminderAutomationId",
+      "value": ""
+    },
+    {
+      "key": "automationLogId",
+      "value": ""
+    },
+    {
+      "key": "voiceCallId",
+      "value": ""
+    },
+    {
+      "key": "templateId",
+      "value": ""
+    },
+    {
+      "key": "whatsappMessageId",
+      "value": ""
+    },
+    {
+      "key": "whatsappProviderMessageId",
+      "value": ""
+    },
+    {
+      "key": "smsProviderMessageId",
+      "value": ""
+    },
+    {
+      "key": "callSid",
+      "value": "CALL123"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (!pm.collectionVariables.get('callSid') || pm.collectionVariables.get('callSid') === 'CALL123') {",
+          "  const random = Math.random().toString(36).slice(2, 8).toUpperCase();",
+          "  pm.collectionVariables.set('callSid', `CALL-${random}`);",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Frontend",
+      "item": [
+        {
+          "name": "Open App",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{frontendUrl}}/",
+              "host": [
+                "{{frontendUrl}}"
+              ],
+              "path": [
+                ""
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Local Test User\",\n  \"email\": \"local.test@example.com\",\n  \"phone\": \"+919900001111\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('accessToken', json.data.accessToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Me",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "List Users",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Business",
+      "item": [
+        {
+          "name": "Create Business",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('businessId', json.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"businessName\": \"Nova Skin Studio\",\n  \"ownerName\": \"Riya Sharma\",\n  \"phone\": \"+911140001122\",\n  \"email\": \"hello@novaskin.com\",\n  \"address\": \"Delhi, India\",\n  \"logoUrl\": \"https://cdn.example.com/logo.png\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/business",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "business"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Business",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/business?page=1&limit=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "business"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Business",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/business/{{businessId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "business",
+                "{{businessId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Business",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"businessName\": \"Nova Skin Studio Updated\",\n  \"address\": \"Gurugram, India\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/business/{{businessId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "business",
+                "{{businessId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Business",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/business/{{businessId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "business",
+                "{{businessId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Services",
+      "item": [
+        {
+          "name": "Create Service",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('serviceId', json.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"serviceName\": \"Dermatology Consultation\",\n  \"serviceCode\": \"DERM-001\",\n  \"description\": \"Initial consultation\",\n  \"price\": 1500,\n  \"duration\": 30,\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/services",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "services"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Services",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/services?page=1&limit=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "services"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Service",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/services/{{serviceId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "services",
+                "{{serviceId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Service",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Updated consultation\",\n  \"price\": 1800\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/services/{{serviceId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "services",
+                "{{serviceId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Service",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/services/{{serviceId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "services",
+                "{{serviceId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Clients",
+      "item": [
+        {
+          "name": "Create Client",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('clientId', json.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Priya Mehra\",\n  \"gender\": \"female\",\n  \"phone\": \"+919876511220\",\n  \"whatsapp\": \"+919876511220\",\n  \"email\": \"priya@example.com\",\n  \"preferredContactMode\": \"whatsapp\",\n  \"preferredContactTime\": \"18:00-20:00\",\n  \"notes\": \"Prefers concise updates\",\n  \"birthday\": \"1994-08-15\",\n  \"anniversary\": \"2020-02-10\",\n  \"serviceIds\": []\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/clients",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clients"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Clients",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/clients?page=1&limit=10&search=Priya",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clients"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "search",
+                  "value": "Priya"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Client",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/clients/{{clientId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clients",
+                "{{clientId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Client",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"preferredContactMode\": \"call\",\n  \"notes\": \"Follow up in the evening\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/clients/{{clientId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clients",
+                "{{clientId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Client",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/clients/{{clientId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clients",
+                "{{clientId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Text Messages",
+      "item": [
+        {
+          "name": "Create Text Message",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('textMessageId', json.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"channel\": \"whatsapp\",\n  \"toAddress\": \"+919822223344\",\n  \"subject\": \"Report update\",\n  \"bodyText\": \"Your report is ready for collection tomorrow.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/text-messages",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "text-messages"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Text Messages",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/text-messages?page=1&limit=10&channel=whatsapp",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "text-messages"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "channel",
+                  "value": "whatsapp"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Text Message",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/text-messages/{{textMessageId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "text-messages",
+                "{{textMessageId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Text Message",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"delivered\",\n  \"previewText\": \"Updated preview\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/text-messages/{{textMessageId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "text-messages",
+                "{{textMessageId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Automations",
+      "item": [
+        {
+          "name": "Create Automation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('automationId', json.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Feedback Reminder\",\n  \"description\": \"Send a reminder after service completion\",\n  \"triggerType\": \"feedback_request\",\n  \"channel\": \"whatsapp\",\n  \"actionType\": \"send_message\",\n  \"scheduleType\": \"delayed\",\n  \"scheduleValue\": \"4h\",\n  \"isActive\": true,\n  \"triggerConfig\": {\n    \"delayHours\": 4\n  },\n  \"executionRules\": {\n    \"maxRetryCount\": 3\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/automations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "automations"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Automations",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/automations?page=1&limit=10&triggerType=feedback_request&channel=whatsapp",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "automations"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "triggerType",
+                  "value": "feedback_request"
+                },
+                {
+                  "key": "channel",
+                  "value": "whatsapp"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Automation",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/automations/{{automationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "automations",
+                "{{automationId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Automation",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Updated reminder automation\",\n  \"scheduleType\": \"delayed\",\n  \"scheduleValue\": \"15m\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/automations/{{automationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "automations",
+                "{{automationId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Toggle Automation",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isActive\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/automations/{{automationId}}/toggle",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "automations",
+                "{{automationId}}",
+                "toggle"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Automation Logs",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/automations/{{automationId}}/logs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "automations",
+                "{{automationId}}",
+                "logs"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Automation",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/automations/{{automationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "automations",
+                "{{automationId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Voice Calls",
+      "item": [
+        {
+          "name": "Create Outgoing Call",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('voiceCallId', json.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerName\": \"Rohan Mehta\",\n  \"customerPhone\": \"+919833334455\",\n  \"callSid\": \"{{callSid}}\",\n  \"direction\": \"outgoing\",\n  \"fromNumber\": \"+911140001122\",\n  \"toNumber\": \"+919833334455\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/voice-calls/outgoing",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "voice-calls",
+                "outgoing"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Voice Calls",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/voice-calls?page=1&limit=10&direction=outgoing&phone=9833",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "voice-calls"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "direction",
+                  "value": "outgoing"
+                },
+                {
+                  "key": "phone",
+                  "value": "9833"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Voice Call",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/voice-calls/{{voiceCallId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "voice-calls",
+                "{{voiceCallId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Voice Call Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"in_progress\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/voice-calls/{{voiceCallId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "voice-calls",
+                "{{voiceCallId}}",
+                "status"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Voice Call",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerName\": \"Rohan Mehta Updated\",\n  \"duration\": 60\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/voice-calls/{{voiceCallId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "voice-calls",
+                "{{voiceCallId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Linked Transcript",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/voice-calls/{{voiceCallId}}/transcript",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "voice-calls",
+                "{{voiceCallId}}",
+                "transcript"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Linked Summary",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/voice-calls/{{voiceCallId}}/summary",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "voice-calls",
+                "{{voiceCallId}}",
+                "summary"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Transcripts",
+      "item": [
+        {
+          "name": "Generate Transcript",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"provider\": \"mock-transcriber\",\n  \"language\": \"en\",\n  \"confidence\": 0.95\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/transcripts/generate/{{voiceCallId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "transcripts",
+                "generate",
+                "{{voiceCallId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Transcript",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/transcripts/{{voiceCallId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "transcripts",
+                "{{voiceCallId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Recordings",
+      "item": [
+        {
+          "name": "Create Recording",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"provider\": \"mock-storage\",\n  \"duration\": 90\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/recordings/{{voiceCallId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "recordings",
+                "{{voiceCallId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Recording",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/recordings/{{voiceCallId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "recordings",
+                "{{voiceCallId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "AI Summary",
+      "item": [
+        {
+          "name": "Generate AI Summary",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"modelName\": \"mock-gpt-summary\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ai-summary/generate/{{voiceCallId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ai-summary",
+                "generate",
+                "{{voiceCallId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get AI Summary",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/ai-summary/{{voiceCallId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ai-summary",
+                "{{voiceCallId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Webhooks",
+      "item": [
+        {
+          "name": "Incoming Call Webhook",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"callSid\": \"{{callSid}}-IN\",\n  \"from\": \"+919944445566\",\n  \"to\": \"+911140001122\",\n  \"customerName\": \"Incoming Caller\",\n  \"status\": \"ringing\",\n  \"duration\": 0\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/webhooks/call/incoming",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "webhooks",
+                "call",
+                "incoming"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Call Status Webhook",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"callSid\": \"{{callSid}}\",\n  \"from\": \"+919833334455\",\n  \"to\": \"+911140001122\",\n  \"status\": \"completed\",\n  \"duration\": 122\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/webhooks/call/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "webhooks",
+                "call",
+                "status"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Call Completed Webhook",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"callSid\": \"{{callSid}}\",\n  \"from\": \"+919833334455\",\n  \"to\": \"+911140001122\",\n  \"status\": \"completed\",\n  \"duration\": 122\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/webhooks/call/completed",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "webhooks",
+                "call",
+                "completed"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Messages",
+      "item": [
+        {
+          "name": "List Messages",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/messages?page=1&limit=10&channel=whatsapp&direction=outgoing",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "messages"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "channel",
+                  "value": "whatsapp"
+                },
+                {
+                  "key": "direction",
+                  "value": "outgoing"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Message",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/messages/{{whatsappMessageId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "messages",
+                "{{whatsappMessageId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Client Messages",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/messages/client/{{clientId}}?page=1&limit=20&search=report",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "messages",
+                "client",
+                "{{clientId}}"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "search",
+                  "value": "report"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "WhatsApp",
+      "item": [
+        {
+          "name": "Send WhatsApp",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('whatsappMessageId', json.data.id);",
+                  "pm.collectionVariables.set('whatsappProviderMessageId', json.data.providerMessageId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clientId\": \"{{clientId}}\",\n  \"phone\": \"+919876511220\",\n  \"message\": \"Hello, your report is ready for pickup tomorrow.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/whatsapp/send",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "whatsapp",
+                "send"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Incoming WhatsApp Webhook",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"from\": \"+919876511220\",\n  \"to\": \"+911140001122\",\n  \"message\": \"Can I reschedule my appointment to Friday?\",\n  \"autoReply\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/whatsapp/webhook/incoming",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "whatsapp",
+                "webhook",
+                "incoming"
+              ]
+            }
+          }
+        },
+        {
+          "name": "WhatsApp Status Webhook",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"providerMessageId\": \"{{whatsappProviderMessageId}}\",\n  \"status\": \"read\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/whatsapp/webhook/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "whatsapp",
+                "webhook",
+                "status"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "SMS",
+      "item": [
+        {
+          "name": "Send SMS",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('smsProviderMessageId', json.data.providerMessageId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clientId\": \"{{clientId}}\",\n  \"phone\": \"+919876511220\",\n  \"message\": \"Reminder: please share your feedback after the visit.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sms/send",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sms",
+                "send"
+              ]
+            }
+          }
+        },
+        {
+          "name": "SMS Status Webhook",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"providerMessageId\": \"{{smsProviderMessageId}}\",\n  \"status\": \"delivered\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sms/webhook/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sms",
+                "webhook",
+                "status"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Incoming SMS Webhook",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"from\": \"+919876511220\",\n  \"to\": \"+911140001122\",\n  \"message\": \"Please call me back after 5 PM.\",\n  \"autoReply\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sms/webhook/incoming",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sms",
+                "webhook",
+                "incoming"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Email",
+      "item": [
+        {
+          "name": "Send Email",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clientId\": \"{{clientId}}\",\n  \"to\": \"priya@example.com\",\n  \"subject\": \"Your lab report is ready\",\n  \"body\": \"Hello Priya, your lab report is ready for pickup tomorrow.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/email/send",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "email",
+                "send"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Email History",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/email/history?page=1&limit=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "email",
+                "history"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Incoming Email Webhook",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"from\": \"priya@example.com\",\n  \"to\": \"hello@novaskin.com\",\n  \"subject\": \"Re: Your lab report is ready\",\n  \"body\": \"Thank you, I will come tomorrow afternoon.\",\n  \"autoReply\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/email/webhook/incoming",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "email",
+                "webhook",
+                "incoming"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Templates",
+      "item": [
+        {
+          "name": "Create Template",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('templateId', json.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Report Ready WhatsApp\",\n  \"channel\": \"whatsapp\",\n  \"templateType\": \"report_ready\",\n  \"content\": \"Hello {{name}}, your report is ready.\",\n  \"variables\": [\"name\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/templates",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "templates"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Templates",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/templates",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "templates"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Template",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Hello {{name}}, your report is ready for pickup.\",\n  \"variables\": [\"name\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/templates/{{templateId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "templates",
+                "{{templateId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Template",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/templates/{{templateId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "templates",
+                "{{templateId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Conversations",
+      "item": [
+        {
+          "name": "Client Timeline",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/conversations/client/{{clientId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "conversations",
+                "client",
+                "{{clientId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "AI Reply",
+      "item": [
+        {
+          "name": "Generate AI Reply",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"I want to book an appointment for tomorrow.\",\n  \"channel\": \"whatsapp\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ai-reply/generate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ai-reply",
+                "generate"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reminders",
+      "item": [
+        {
+          "name": "Test Reminder",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"automationId\": \"{{reminderAutomationId}}\",\n  \"clientId\": \"{{clientId}}\",\n  \"variables\": {\n    \"name\": \"Priya\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/reminders/test",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reminders",
+                "test"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Automation Logs",
+      "item": [
+        {
+          "name": "List Automation Logs",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "const firstId = json.data.items?.[0]?.id || '';",
+                  "if (firstId) pm.collectionVariables.set('automationLogId', firstId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/automation-logs?page=1&limit=10&automationId={{reminderAutomationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "automation-logs"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "automationId",
+                  "value": "{{reminderAutomationId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Automation Log",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/automation-logs/{{automationLogId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "automation-logs",
+                "{{automationLogId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "AI Automation",
+      "item": [
+        {
+          "name": "Suggestions",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/ai-automation/suggestions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ai-automation",
+                "suggestions"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "AI",
+      "item": [
+        {
+          "name": "Generate Summary",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"transcript\": \"Customer confirmed the appointment for tomorrow morning and asked for a callback if there is any delay.\",\n  \"customerName\": \"Rohan Mehta\",\n  \"businessName\": \"Smoke Clinic\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ai/generate-summary",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ai",
+                "generate-summary"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Generate Reply",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Can I move my appointment to Friday afternoon?\",\n  \"channel\": \"whatsapp\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ai/generate-reply",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ai",
+                "generate-reply"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Extract Key Points",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"Customer asked for a callback after 5 PM, confirmed the report discussion, and requested a Friday appointment.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ai/extract-keypoints",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ai",
+                "extract-keypoints"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Analyze Sentiment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"Thank you, the staff was very helpful and the update was clear.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ai/analyze-sentiment",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ai",
+                "analyze-sentiment"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "STT & TTS",
+      "item": [
+        {
+          "name": "Transcribe Audio",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"callId\": \"{{voiceCallId}}\",\n  \"audioUrl\": \"https://example.com/mock-audio.wav\",\n  \"language\": \"en\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/stt/transcribe",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "stt",
+                "transcribe"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Generate TTS",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"Hello, your report is ready for pickup tomorrow.\",\n  \"voice\": \"aura-asteria-en\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tts/generate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tts",
+                "generate"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Twilio",
+      "item": [
+        {
+          "name": "Outgoing Call",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerName\": \"Twilio Test Caller\",\n  \"customerPhone\": \"+919811115555\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/twilio/outgoing-call",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "twilio",
+                "outgoing-call"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Voice Webhook",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"CallSid\": \"TWILIO-CALL-001\",\n  \"From\": \"+919811115555\",\n  \"To\": \"+911140001122\",\n  \"CallStatus\": \"in-progress\",\n  \"SpeechResult\": \"I want to confirm my appointment for tomorrow.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/twilio/webhook/voice",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "twilio",
+                "webhook",
+                "voice"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Status Webhook",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"CallSid\": \"TWILIO-CALL-002\",\n  \"From\": \"+919811115555\",\n  \"To\": \"+911140001122\",\n  \"CallStatus\": \"completed\",\n  \"CallDuration\": \"45\",\n  \"RecordingUrl\": \"https://example.com/recordings/twilio-call\",\n  \"RecordingDuration\": \"45\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/twilio/webhook/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "twilio",
+                "webhook",
+                "status"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Stats",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/stats",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dashboard",
+                "stats"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Recent Activity",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/recent-activity",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dashboard",
+                "recent-activity"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Recent Activities",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/recent-activities",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dashboard",
+                "recent-activities"
+              ]
+            }
+          }
+        },
+        {
+          "name": "AI Insights",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/ai-insights",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dashboard",
+                "ai-insights"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Quick Insights",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/quick-insights",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dashboard",
+                "quick-insights"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Activities",
+      "item": [
+        {
+          "name": "List Activities",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/activities",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "activities"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reports",
+      "item": [
+        {
+          "name": "Calls Report",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/reports/calls?page=1&limit=10&dateFrom=2026-05-01&dateTo=2026-05-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "calls"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "dateFrom",
+                  "value": "2026-05-01"
+                },
+                {
+                  "key": "dateTo",
+                  "value": "2026-05-31"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Messages Report",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/reports/messages?page=1&limit=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "messages"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Automations Report",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/reports/automations?page=1&limit=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "automations"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Clients Report",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/reports/clients?page=1&limit=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "clients"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Overview Report",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/reports/overview?dateFrom=2026-05-01&dateTo=2026-05-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "overview"
+              ],
+              "query": [
+                {
+                  "key": "dateFrom",
+                  "value": "2026-05-01"
+                },
+                {
+                  "key": "dateTo",
+                  "value": "2026-05-31"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Call Analytics",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/reports/call-analytics",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "call-analytics"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Sentiment Report",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/reports/sentiment",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "sentiment"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Daily Summary",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/reports/daily-summary",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "daily-summary"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Export PDF",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reportType\": \"daily_summary\",\n  \"dateFrom\": \"2026-05-01\",\n  \"dateTo\": \"2026-05-10\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/reports/export-pdf",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "export-pdf"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Export Call Summary PDF",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"callId\": \"{{voiceCallId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/reports/export/call-summary",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "export",
+                "call-summary"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Export Client Report PDF",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clientId\": \"{{clientId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/reports/export/client-report",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "export",
+                "client-report"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Export Daily Summary PDF",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dateFrom\": \"2026-05-01\",\n  \"dateTo\": \"2026-05-31\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/reports/export/daily-summary",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "export",
+                "daily-summary"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Export Transcript PDF",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"callId\": \"{{voiceCallId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/reports/export/transcript",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "export",
+                "transcript"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Analytics",
+      "item": [
+        {
+          "name": "Call Trends",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/analytics/call-trends?groupBy=day&dateFrom=2026-05-01&dateTo=2026-05-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "analytics",
+                "call-trends"
+              ],
+              "query": [
+                {
+                  "key": "groupBy",
+                  "value": "day"
+                },
+                {
+                  "key": "dateFrom",
+                  "value": "2026-05-01"
+                },
+                {
+                  "key": "dateTo",
+                  "value": "2026-05-31"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Message Trends",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/analytics/message-trends?groupBy=day",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "analytics",
+                "message-trends"
+              ],
+              "query": [
+                {
+                  "key": "groupBy",
+                  "value": "day"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Automation Trends",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/analytics/automation-trends?groupBy=week",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "analytics",
+                "automation-trends"
+              ],
+              "query": [
+                {
+                  "key": "groupBy",
+                  "value": "week"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Sentiment Trends",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/analytics/sentiment-trends?groupBy=day",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "analytics",
+                "sentiment-trends"
+              ],
+              "query": [
+                {
+                  "key": "groupBy",
+                  "value": "day"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Channel Performance",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/analytics/channel-performance",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "analytics",
+                "channel-performance"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "AI Insights",
+      "item": [
+        {
+          "name": "Business Insight",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/ai-insights/business",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ai-insights",
+                "business"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Communication Insight",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/ai-insights/communication",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ai-insights",
+                "communication"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Follow-up Insight",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/ai-insights/followups",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ai-insights",
+                "followups"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Report History",
+      "item": [
+        {
+          "name": "List Report History",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/report-history?page=1&limit=10&dateFrom=2026-05-01&dateTo=2026-05-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "report-history"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "dateFrom",
+                  "value": "2026-05-01"
+                },
+                {
+                  "key": "dateTo",
+                  "value": "2026-05-31"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

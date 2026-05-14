@@ -1,0 +1,368 @@
+{
+  "info": {
+    "name": "AI Receptionist Demo Readiness",
+    "_postman_id": "a2c1261a-e0e0-4c11-bdf5-df493ad4d001",
+    "description": "Step 12 demo-readiness collection for local AI Receptionist POC testing.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:4000/api/v1" },
+    { "key": "token", "value": "" },
+    { "key": "businessId", "value": "" },
+    { "key": "clientId", "value": "" },
+    { "key": "serviceId", "value": "" },
+    { "key": "voiceCallId", "value": "" },
+    { "key": "messageId", "value": "" },
+    { "key": "automationId", "value": "" },
+    { "key": "sessionId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"owner@clinic.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/login"
+          }
+        },
+        {
+          "name": "Current User",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/auth/me"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Business",
+      "item": [
+        {
+          "name": "List Businesses",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/business?page=1&limit=10"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Clients",
+      "item": [
+        {
+          "name": "List Clients",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/clients?page=1&limit=10"
+          }
+        },
+        {
+          "name": "Create Client",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Demo Lead\",\n  \"gender\": \"female\",\n  \"phone\": \"+919811119999\",\n  \"whatsapp\": \"+919811119999\",\n  \"email\": \"demo.lead@example.com\",\n  \"preferredContactMode\": \"whatsapp\",\n  \"preferredContactTime\": \"18:00-20:00\",\n  \"notes\": \"Created during client demo\"\n}"
+            },
+            "url": "{{baseUrl}}/clients"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Services",
+      "item": [
+        {
+          "name": "List Services",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/services?page=1&limit=10"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Voice Calls",
+      "item": [
+        {
+          "name": "List Voice Calls",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/voice-calls?page=1&limit=10"
+          }
+        },
+        {
+          "name": "Create Outgoing Voice Call",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerName\": \"Demo Caller\",\n  \"customerPhone\": \"+919877770000\",\n  \"direction\": \"outgoing\",\n  \"fromNumber\": \"+911140001122\",\n  \"toNumber\": \"+919877770000\"\n}"
+            },
+            "url": "{{baseUrl}}/voice-calls/outgoing"
+          }
+        },
+        {
+          "name": "Get Call Transcript",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/voice-calls/{{voiceCallId}}/transcript"
+          }
+        },
+        {
+          "name": "Get Call Summary",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/voice-calls/{{voiceCallId}}/summary"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Messages",
+      "item": [
+        {
+          "name": "List Messages",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/messages?page=1&limit=10"
+          }
+        },
+        {
+          "name": "Send WhatsApp",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clientId\": \"{{clientId}}\",\n  \"phone\": \"+919876511220\",\n  \"message\": \"Hello, your report is ready for pickup tomorrow.\"\n}"
+            },
+            "url": "{{baseUrl}}/whatsapp/send"
+          }
+        },
+        {
+          "name": "Send SMS",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clientId\": \"{{clientId}}\",\n  \"phone\": \"+919876511220\",\n  \"message\": \"Reminder: your consultation is tomorrow at 6 PM.\"\n}"
+            },
+            "url": "{{baseUrl}}/sms/send"
+          }
+        },
+        {
+          "name": "Send Email",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clientId\": \"{{clientId}}\",\n  \"to\": \"priya@example.com\",\n  \"subject\": \"Your report is ready\",\n  \"body\": \"Hello, your report is ready and can be collected tomorrow.\"\n}"
+            },
+            "url": "{{baseUrl}}/email/send"
+          }
+        },
+        {
+          "name": "Conversation Timeline",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/conversations/client/{{clientId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Automations",
+      "item": [
+        {
+          "name": "List Automations",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/automations?page=1&limit=10"
+          }
+        },
+        {
+          "name": "Create Automation",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Demo Reminder Flow\",\n  \"description\": \"Created during QA demo\",\n  \"triggerType\": \"manual\",\n  \"channel\": \"whatsapp\",\n  \"actionType\": \"send_message\",\n  \"scheduleType\": \"instant\",\n  \"scheduleValue\": \"0\",\n  \"isActive\": true\n}"
+            },
+            "url": "{{baseUrl}}/automations"
+          }
+        },
+        {
+          "name": "Automation Logs",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/automation-logs?page=1&limit=10"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reports And Analytics",
+      "item": [
+        {
+          "name": "Dashboard Stats",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/dashboard/stats"
+          }
+        },
+        {
+          "name": "Reports Overview",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/reports/overview"
+          }
+        },
+        {
+          "name": "Call Trends",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/analytics/call-trends?groupBy=day"
+          }
+        },
+        {
+          "name": "Export Call Summary PDF",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"callId\": \"{{voiceCallId}}\"\n}"
+            },
+            "url": "{{baseUrl}}/reports/export/call-summary"
+          }
+        }
+      ]
+    },
+    {
+      "name": "AI",
+      "item": [
+        {
+          "name": "Generate Summary",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"transcript\": \"Customer confirmed appointment for tomorrow morning.\",\n  \"customerName\": \"Priya Mehra\",\n  \"businessName\": \"Nova Skin Studio\"\n}"
+            },
+            "url": "{{baseUrl}}/ai/generate-summary"
+          }
+        },
+        {
+          "name": "Generate Reply",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Can I reschedule my appointment to Friday evening?\",\n  \"channel\": \"whatsapp\"\n}"
+            },
+            "url": "{{baseUrl}}/ai/generate-reply"
+          }
+        },
+        {
+          "name": "Generate TTS",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"Hello, your report is ready for pickup tomorrow.\",\n  \"voice\": \"aura-asteria-en\"\n}"
+            },
+            "url": "{{baseUrl}}/tts/generate"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Realtime",
+      "item": [
+        {
+          "name": "List Live Sessions",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/live-sessions?scope=all"
+          }
+        },
+        {
+          "name": "Active Realtime Sessions",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{baseUrl}}/realtime/active-sessions"
+          }
+        },
+        {
+          "name": "Twilio Media Stream TwiML",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/twilio/webhook/media-stream"
+          }
+        }
+      ]
+    }
+  ]
+}
